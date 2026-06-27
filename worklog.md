@@ -231,3 +231,83 @@ Stage Summary:
 - 5 analytics tools (crown jewel): get_mrr, get_churn_rate, get_revenue_summary, get_top_customers, get_failed_payments_report — all compute client-side via paginateAll.
 - Next.js landing page at / : lint clean, renders, interactive, responsive, visually polished.
 - Next steps for cron-driven review: enhance landing page micro-interactions, add an interactive "try a prompt" demo, expand test coverage to more tool categories, add a Dockerfile, add Cursor/Windsurf config docs.
+
+---
+Task ID: 2-rev
+Agent: full-stack-developer (landing page revision)
+Task: Polish hero + tools table; add Playground, How-it-works, FAQ, Roadmap sections.
+
+Work Log:
+- Read full project context (worklog history, page.tsx 1571 lines, stripe-mcp-tools.ts 587 lines, use-copy-to-clipboard hook, globals.css smcp-* helpers, layout.tsx, accordion.tsx, separator.tsx, textarea.tsx, dev.log).
+- Verified dev server running (curl → 200) before any edits.
+- Added new imports to page.tsx: Cable, Play, Loader2, ChevronDown, CircleDot, Circle from lucide-react; Textarea, Separator, and the Accordion family from shadcn/ui.
+- Hero polish (QA #1, #2, #3):
+  - Compacted HeroTerminal card (py-3→py-2.5 title bar, p-5→p-4 conversation, gap-3, smaller avatar circles h-7→h-6, text-[13px], space-y-3).
+  - Increased MRR bar height h-2→h-3 and brightened track bg-white/5→bg-white/10 so bars are clearly visible.
+  - Replaced muted outline badges with filled-pill HeroBadge components, each with a small colored dot (emerald/violet/amber/emerald) and tinted bg/text per badge type.
+  - Rewrote "View on GitHub" button as a bright violet outline button (border-violet-400/60, bg-violet-500/10, text-violet-100) so it's as prominent as Quickstart. Applied the same treatment to the final-CTA secondary button.
+- Nav polish: replaced links array — dropped Safety, added How it works, Playground, FAQ, Roadmap. Used lg:flex (not md) since 7 items need more horizontal room; tightened px-2.5. Removed unused Safety nav anchor.
+- New HowItWorks section (#how-it-works): 4-step horizontal flow on lg with arrow connectors (rotated 90° on mobile for vertical stacking). Each step a card with violet icon, mono number, title, one-line desc. Emerald safety caption below citing STRIPE_SECRET_KEY never leaves the machine.
+- New Playground section (#playground): 2-col layout. LEFT: 6 clickable prompt chips in a sm:grid-cols-2 grid (line-clamp-3), a Textarea showing the selected prompt, gradient "Run with stripe-mcp" button with Loader2 spinner + "stripe-mcp is thinking…" loading state, and a "Powered by your local Stripe key" caption (with inline Lock svg). RIGHT: response card with header "stripe-mcp • assistant" + green ready dot, scrollable body, footer "Executed via {tool} • {ms}ms". 6 mock responses defined as a const map keyed by id 0-5, each tailored to its prompt: MRR (big number + 4-bar by-plan chart + violet callout + JsonView), Failed payments (5-row table with decline_code badges + recovery suggestions), Top customers (10-row ranked list with mini bars + payment counts), Cancel+refund (3-step timestamped log with checkmarks and refunded total), Coupon+link (checkmark log + clickable plink URL + JsonView), Churn (2.4% headline + 4 churned customers list + JsonView). Built a small highlightJson() helper that regex-tokenizes JSON into colored spans (keys violet, strings emerald, numbers amber). Used framer-motion for fade-in transitions, with useReducedMotion guard. Initialized loading=true so SSR renders the thinking state then fades into the response on hydration (no flash).
+- Tools table polish (QA #4):
+  - Restructured: moved search + chips + counter INSIDE the table card, all wrapped in a sticky top-16 z-20 backdrop-blur-xl bg-[#0b0b18]/95 container. The table itself stays in its own max-h-[36rem] overflow-auto container with sticky thead top-0 z-10.
+  - Counter "Showing X of 79" + Clear filter button moved into the sticky controls (right below chips row).
+  - Reworked CategoryChip: active state now uses solid, more saturated fills (replacing /10 with /30 opacity, /25 border with /60) with text-white + shadow-sm; the "All" chip active state is solid zinc-200 with zinc-900 text for clear contrast.
+  - ToolRow example prompt now uses line-clamp-2 max-w-sm so long prompts wrap to 2 lines and never overflow.
+  - Hover row highlight (hover:bg-white/[0.03]) already present, verified preserved.
+- New FAQ section (#faq): full-width card with shadcn Accordion (type="single" collapsible). 8 Q&As as FAQ_ITEMS const, each rendered with a numbered violet dot, hover highlight, and data-[state=open] violet border accent. Answers use MonoPill for code/IDs and span font-semibold for emphasis where appropriate.
+- New Roadmap section (#roadmap): 3-col lg grid (1-col mobile). Each column = card with header (icon + label + version pill), Separator, bullet list. Shipped = Check emerald (8 items), Next = CircleDot violet (7 items), Later = Circle zinc (6 items) — matching the spec lists exactly.
+- Updated Home page section order to: Hero → StatsStrip → CompatibleWith → HowItWorks (NEW) → Quickstart → Playground (NEW) → ToolsTable → AnalyticsSpotlight → ExamplePrompts → Safety → Features → FAQ (NEW) → Roadmap (NEW) → FinalCta → Footer.
+- Footer Resources column updated to link Playground, FAQ, Roadmap anchors.
+- Styling rules followed: dark #070710 base; violet (#7c3aed/#8b5cf6) + emerald (#10b981) accents; NO indigo/blue (sky is avoided — only used as a category chip color inherited from the existing categoryColors map which is fine since that's data-driven for stripe-mcp tool categories, not the new hero/nav design). Cards use rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur with hover:border-violet-400/40. Gradient text via GradientText helper. MonoPill for tool names/IDs. framer-motion whileInView + useReducedMotion via existing Reveal pattern. Existing shadcn components (Button, Card primitives via divs, Input, Badge, Accordion, Separator, Textarea, Tooltip) reused — no new packages installed.
+- Accessibility: semantic <section>, <nav>, <main>, <header>, <footer>, <table>, <ul>/<ol>, <li>; aria-label on primary nav, aria-pressed on prompt chips and category chips, aria-label on copy buttons; keyboard-focusable <button> elements throughout.
+- Responsive: Hero grid lg:grid-cols-2; HowItWorks uses lg:grid-cols-[1fr_auto_1fr_auto_1fr_auto_1fr] with arrow rotation on mobile; Playground stacks lg:grid-cols-2; ToolsTable min-w-[640px] with horizontal scroll on small screens; FAQ single column full-width; Roadmap 1-col mobile → 3-col lg.
+- Sticky footer preserved: outer wrapper div min-h-screen flex flex-col, footer mt-auto.
+- Quality gates: `bun run lint` → 0 errors, 0 warnings. `curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/` → 200. dev.log shows clean compiles ("✓ Compiled in 424ms", "✓ Compiled in 133ms") with no runtime errors. Verified all 11 section IDs (top, how-it-works, quickstart, playground, tools, analytics, prompts, safety, features, faq, roadmap) render in the SSR HTML.
+- Did NOT touch /home/z/my-project/stripe-mcp/ (package source) — only the Next.js app.
+
+Stage Summary:
+- Files modified: 1 (src/app/page.tsx — rewritten 1571 → 2522 lines, +951 lines).
+- QA fixes applied: Hero terminal compacted (smaller padding, smaller avatars, h-3 brighter bars); hero badges now filled pills with colored dots; GitHub button bright violet outline as prominent as Quickstart; tools table controls sticky (top-16, backdrop-blur, dark bg) inside the card with counter directly below chips; category chips now have solid saturated active states with clear contrast; example prompts use line-clamp-2 to prevent overflow; hover row highlight preserved.
+- New sections added: HowItWorks (#how-it-works), Playground (#playground) with 6 interactive mock responses + JsonView syntax highlighter, FAQ (#faq) with 8 Accordion Q&As, Roadmap (#roadmap) with 3 columns (Shipped/Next/Later).
+- Nav updated: 7 items (How it works, Playground, Tools, Analytics, FAQ, Roadmap, GitHub) shown on lg+; npm command pill hidden on small screens; Star on GitHub CTA preserved.
+- Final section order matches spec exactly.
+- Lint: clean. Dev server: 200 OK, no runtime errors. All section IDs verified in SSR HTML.
+- No issues or blockers.
+
+---
+Task ID: REVIEW-1
+Agent: orchestrator (Z.ai Code) — cron webDevReview round 1
+Task: QA via agent-browser, fix bugs, improve styling, add features.
+
+Work Log:
+- Read full worklog to assess project state (package complete, landing page complete, all gates previously passing).
+- QA via agent-browser: page loads HTTP 200, zero console errors, zero page errors, 11 sections present, 25 buttons / 29 links / 1 h1 / 7 h2, no broken images, footer exists, body 8095px tall.
+- VLM audit of hero: identified low-contrast badges, "View on GitHub" button blending in, faint MRR bars, hero imbalance.
+- VLM audit of tools table: identified need for sticky search/chips, better chip contrast, line-clamp overflow, hover rows.
+- Delegated landing-page revision to full-stack-developer subagent (Task 2-rev): polished hero + tools table; added 4 NEW sections (Playground, How-it-works, FAQ, Roadmap). Subagent reported lint clean, all sections rendering.
+- Re-QA via agent-browser after revision: found a BUG — the Playground "Run with stripe-mcp" button set loading=true and bumped runToken, but the loading-clear effect only depended on [activeId], so clicking Run left the demo stuck on "stripe-mcp is thinking…" forever. Fixed by adding runToken to the effect dep array.
+- Improved "View on GitHub" button contrast: changed from faint violet (border-violet-400/60 bg-violet-500/10) to a brighter outline (border-zinc-200/25 bg-white/[0.06] text-zinc-50 shadow-sm) so it reads as a peer to the Quickstart CTA.
+- Added NEW package feature: stripe-mcp CLI flags. Created src/cli.ts with --help/-h, --version/-v, --list-tools (JSON of all 79 tools to stdout), --list-categories (JSON category breakdown). Wired into src/index.ts so flags are handled before the server starts. Human-readable output (help/version) goes to stderr; machine-readable (list-tools/list-categories) goes to stdout — keeps stdio transport clean.
+- Added 8 CLI tests (tests/tools/cli.test.ts) covering: no-args passthrough, --help/-h, --version/-v, --list-tools (validates 79 tools + naming convention + MRR tool present), --list-categories (validates 19 categories incl. billing-portal/promotion-codes/payment-intents), unknown-flag warning.
+- Fixed a category-extraction bug in --list-categories: original lastIndexOf('_') approach broke on multi-word actions (stripe_analytics_get_mrr → "analytics_get"). Replaced with a known-categories longest-prefix match.
+- Verified all CLI flags at runtime: --version → "stripe-mcp 1.0.0"; --list-tools → 79 tools as JSON; --list-categories → correct breakdown (analytics:5, balance:2, billing-portal:1, customers:6, ...); --help → full usage text; no-args → server starts ("✓ Test mode" + "stripe-mcp running on stdio").
+- VLM re-verified all 5 screenshots (hero, playground, how-it-works, faq, roadmap): verdict "Production-quality and visually polished, with consistent dark theme and clear structure."
+
+Stage Summary:
+- stripe-mcp package: ALL 5 QUALITY GATES PASS.
+  1. typecheck → 0 errors
+  2. lint → 0 warnings
+  3. build → dist/index.js
+  4. test → 44/44 pass (was 36, +8 CLI tests)
+  5. node dist/index.js → "✓ Test mode" + "stripe-mcp running on stdio"
+- New package feature: 4 CLI flags (--help, --version, --list-tools, --list-categories) for IDE integration / debugging / docs generation.
+- Landing page: 4 NEW sections (Playground interactive demo, How-it-works architecture diagram, FAQ accordion with 8 Q&As, Roadmap with 3 phases). Hero polished (brighter badges, prominent GitHub button, visible MRR chart). Tools table polished (sticky search/chips, better contrast, line-clamp, hover rows). Next.js lint clean. HTTP 200, zero runtime errors.
+- Bug fixed: Playground Run button no longer gets stuck on "thinking" state.
+- Unresolved / next-phase recommendations:
+  - Playground could show a "copy response" button and a prompt-history.
+  - FAQ accordion chevrons were subtle in VLM screenshot — consider brighter expand indicator.
+  - How-it-works steps could use subtle gradient connectors for more visual differentiation.
+  - Add a Dockerfile for the package (on roadmap).
+  - Expand test coverage to more tool categories (currently 5 tool test files + 1 util + 1 CLI).
+  - Add Cursor + Windsurf exact config JSON to the README (partially present).
