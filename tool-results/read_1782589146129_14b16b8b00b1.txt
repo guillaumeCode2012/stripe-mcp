@@ -1,0 +1,602 @@
+  2115→        /**
+  2116→         * The branding settings for the Checkout Session. This parameter is not allowed if ui_mode is `elements`.
+  2117→         */
+  2118→        branding_settings?: SessionCreateParams.BrandingSettings;
+  2119→        /**
+  2120→         * If set, Checkout displays a back button and customers will be directed to this URL if they decide to cancel payment and return to your website. This parameter is not allowed if ui_mode is `embedded_page` or `elements`.
+  2121→         */
+  2122→        cancel_url?: string;
+  2123→        /**
+  2124→         * A unique string to reference the Checkout Session. This can be a
+  2125→         * customer ID, a cart ID, or similar, and can be used to reconcile the
+  2126→         * session with your internal systems.
+  2127→         */
+  2128→        client_reference_id?: string;
+  2129→        /**
+  2130→         * Configure fields for the Checkout Session to gather active consent from customers.
+  2131→         */
+  2132→        consent_collection?: SessionCreateParams.ConsentCollection;
+  2133→        /**
+  2134→         * Three-letter [ISO currency code](https://www.iso.org/iso-4217-currency-codes.html), in lowercase. Must be a [supported currency](https://stripe.com/docs/currencies). Required in `setup` mode when `payment_method_types` is not set.
+  2135→         */
+  2136→        currency?: string;
+  2137→        /**
+  2138→         * Collect additional information from your customer using custom fields. Up to 3 fields are supported. You can't set this parameter if `ui_mode` is `custom`.
+  2139→         */
+  2140→        custom_fields?: Array<SessionCreateParams.CustomField>;
+  2141→        /**
+  2142→         * Display additional text for your customers using custom text. You can't set this parameter if `ui_mode` is `custom`.
+  2143→         */
+  2144→        custom_text?: SessionCreateParams.CustomText;
+  2145→        /**
+  2146→         * ID of an existing Customer, if one exists. In `payment` mode, the customer's most recently saved card
+  2147→         * payment method will be used to prefill the email, name, card details, and billing address
+  2148→         * on the Checkout page. In `subscription` mode, the customer's [default payment method](https://docs.stripe.com/api/customers/update#update_customer-invoice_settings-default_payment_method)
+  2149→         * will be used if it's a card, otherwise the most recently saved card will be used. A valid billing address, billing name and billing email are required on the payment method for Checkout to prefill the customer's card details.
+  2150→         *
+  2151→         * If the Customer already has a valid [email](https://docs.stripe.com/api/customers/object#customer_object-email) set, the email will be prefilled and not editable in Checkout.
+  2152→         * If the Customer does not have a valid `email`, Checkout will set the email entered during the session on the Customer.
+  2153→         *
+  2154→         * If blank for Checkout Sessions in `subscription` mode or with `customer_creation` set as `always` in `payment` mode, Checkout will create a new Customer object based on information provided during the payment flow.
+  2155→         *
+  2156→         * You can set [`payment_intent_data.setup_future_usage`](https://docs.stripe.com/api/checkout/sessions/create#create_checkout_session-payment_intent_data-setup_future_usage) to have Checkout automatically attach the payment method to the Customer you pass in for future reuse.
+  2157→         */
+  2158→        customer?: string;
+  2159→        /**
+  2160→         * ID of an existing Account, if one exists. Has the same behavior as `customer`.
+  2161→         */
+  2162→        customer_account?: string;
+  2163→        /**
+  2164→         * Configure whether a Checkout Session creates a [Customer](https://docs.stripe.com/api/customers) during Session confirmation.
+  2165→         *
+  2166→         * When a Customer is not created, you can still retrieve email, address, and other customer data entered in Checkout
+  2167→         * with [customer_details](https://docs.stripe.com/api/checkout/sessions/object#checkout_session_object-customer_details).
+  2168→         *
+  2169→         * Sessions that don't create Customers instead are grouped by [guest customers](https://docs.stripe.com/payments/checkout/guest-customers)
+  2170→         * in the Dashboard. Promotion codes limited to first time customers will return invalid for these Sessions.
+  2171→         *
+  2172→         * Can only be set in `payment` and `setup` mode.
+  2173→         */
+  2174→        customer_creation?: SessionCreateParams.CustomerCreation;
+  2175→        /**
+  2176→         * If provided, this value will be used when the Customer object is created.
+  2177→         * If not provided, customers will be asked to enter their email address.
+  2178→         * Use this parameter to prefill customer data if you already have an email
+  2179→         * on file. To access information about the customer once a session is
+  2180→         * complete, use the `customer` field.
+  2181→         */
+  2182→        customer_email?: string;
+  2183→        /**
+  2184→         * Controls what fields on Customer can be updated by the Checkout Session. Can only be provided when `customer` is provided.
+  2185→         */
+  2186→        customer_update?: SessionCreateParams.CustomerUpdate;
+  2187→        /**
+  2188→         * The coupon or promotion code to apply to this Session. Currently, only up to one may be specified.
+  2189→         */
+  2190→        discounts?: Array<SessionCreateParams.Discount>;
+  2191→        /**
+  2192→         * A list of the types of payment methods (e.g., `card`) that should be excluded from this Checkout Session. This should only be used when payment methods for this Checkout Session are managed through the [Stripe Dashboard](https://dashboard.stripe.com/settings/payment_methods).
+  2193→         */
+  2194→        excluded_payment_method_types?: Array<SessionCreateParams.ExcludedPaymentMethodType>;
+  2195→        /**
+  2196→         * Specifies which fields in the response should be expanded.
+  2197→         */
+  2198→        expand?: Array<string>;
+  2199→        /**
+  2200→         * The Epoch time in seconds at which the Checkout Session will expire. It can be anywhere from 30 minutes to 24 hours after Checkout Session creation. By default, this value is 24 hours from creation.
+  2201→         */
+  2202→        expires_at?: number;
+  2203→        /**
+  2204→         * The integration identifier for this Checkout Session. Multiple Checkout Sessions can have the same integration identifier.
+  2205→         */
+  2206→        integration_identifier?: string;
+  2207→        /**
+  2208→         * Generate a post-purchase Invoice for one-time payments.
+  2209→         */
+  2210→        invoice_creation?: SessionCreateParams.InvoiceCreation;
+  2211→        /**
+  2212→         * A list of items the customer is purchasing. Use this parameter to pass one-time or recurring [Prices](https://docs.stripe.com/api/prices). The parameter is required for `payment` and `subscription` mode.
+  2213→         *
+  2214→         * For `payment` mode, there is a maximum of 100 line items, however it is recommended to consolidate line items if there are more than a few dozen.
+  2215→         *
+  2216→         * For `subscription` mode, there is a maximum of 20 line items with recurring Prices and 20 line items with one-time Prices. Line items with one-time Prices will be on the initial invoice only.
+  2217→         */
+  2218→        line_items?: Array<SessionCreateParams.LineItem>;
+  2219→        /**
+  2220→         * The IETF language tag of the locale Checkout is displayed in. If blank or `auto`, the browser's locale is used.
+  2221→         */
+  2222→        locale?: SessionCreateParams.Locale;
+  2223→        /**
+  2224→         * Settings for Managed Payments for this Checkout Session and resulting [PaymentIntents](https://docs.stripe.com/api/payment_intents/object), [Invoices](https://docs.stripe.com/api/invoices/object), and [Subscriptions](https://docs.stripe.com/api/subscriptions/object).
+  2225→         */
+  2226→        managed_payments?: SessionCreateParams.ManagedPayments;
+  2227→        /**
+  2228→         * Set of [key-value pairs](https://docs.stripe.com/api/metadata) that you can attach to an object. This can be useful for storing additional information about the object in a structured format. Individual keys can be unset by posting an empty value to them. All keys can be unset by posting an empty value to `metadata`.
+  2229→         */
+  2230→        metadata?: MetadataParam;
+  2231→        /**
+  2232→         * The mode of the Checkout Session. Pass `subscription` if the Checkout Session includes at least one recurring item.
+  2233→         */
+  2234→        mode?: SessionCreateParams.Mode;
+  2235→        /**
+  2236→         * Controls name collection settings for the session.
+  2237→         *
+  2238→         * You can configure Checkout to collect your customers' business names, individual names, or both. Each name field can be either required or optional.
+  2239→         *
+  2240→         * If a [Customer](https://docs.stripe.com/api/customers) is created or provided, the names can be saved to the Customer object as well.
+  2241→         */
+  2242→        name_collection?: SessionCreateParams.NameCollection;
+  2243→        /**
+  2244→         * A list of optional items the customer can add to their order at checkout. Use this parameter to pass one-time or recurring [Prices](https://docs.stripe.com/api/prices).
+  2245→         *
+  2246→         * There is a maximum of 10 optional items allowed on a Checkout Session, and the existing limits on the number of line items allowed on a Checkout Session apply to the combined number of line items and optional items.
+  2247→         *
+  2248→         * For `payment` mode, there is a maximum of 100 combined line items and optional items, however it is recommended to consolidate items if there are more than a few dozen.
+  2249→         *
+  2250→         * For `subscription` mode, there is a maximum of 20 line items and optional items with recurring Prices and 20 line items and optional items with one-time Prices.
+  2251→         *
+  2252→         * You can't set this parameter if `ui_mode` is `custom`.
+  2253→         */
+  2254→        optional_items?: Array<SessionCreateParams.OptionalItem>;
+  2255→        /**
+  2256→         * Where the user is coming from. This informs the optimizations that are applied to the session. You can't set this parameter if `ui_mode` is `elements`.
+  2257→         */
+  2258→        origin_context?: SessionCreateParams.OriginContext;
+  2259→        /**
+  2260→         * A subset of parameters to be passed to PaymentIntent creation for Checkout Sessions in `payment` mode.
+  2261→         */
+  2262→        payment_intent_data?: SessionCreateParams.PaymentIntentData;
+  2263→        /**
+  2264→         * Specify whether Checkout should collect a payment method. When set to `if_required`, Checkout will not collect a payment method when the total due for the session is 0.
+  2265→         * This may occur if the Checkout Session includes a free trial or a discount.
+  2266→         *
+  2267→         * Can only be set in `subscription` mode. Defaults to `always`.
+  2268→         *
+  2269→         * If you'd like information on how to collect a payment method outside of Checkout, read the guide on configuring [subscriptions with a free trial](https://docs.stripe.com/payments/checkout/free-trials).
+  2270→         */
+  2271→        payment_method_collection?: SessionCreateParams.PaymentMethodCollection;
+  2272→        /**
+  2273→         * The ID of the payment method configuration to use with this Checkout session.
+  2274→         */
+  2275→        payment_method_configuration?: string;
+  2276→        /**
+  2277→         * This parameter allows you to set some attributes on the payment method created during a Checkout session.
+  2278→         */
+  2279→        payment_method_data?: SessionCreateParams.PaymentMethodData;
+  2280→        /**
+  2281→         * Payment-method-specific configuration.
+  2282→         */
+  2283→        payment_method_options?: SessionCreateParams.PaymentMethodOptions;
+  2284→        /**
+  2285→         * A list of the types of payment methods (e.g., `card`) this Checkout Session can accept.
+  2286→         *
+  2287→         * You can omit this attribute to manage your payment methods from the [Stripe Dashboard](https://dashboard.stripe.com/settings/payment_methods).
+  2288→         * See [Dynamic Payment Methods](https://docs.stripe.com/payments/payment-methods/integration-options#using-dynamic-payment-methods) for more details.
+  2289→         *
+  2290→         * Read more about the supported payment methods and their requirements in our [payment
+  2291→         * method details guide](https://docs.stripe.com/docs/payments/checkout/payment-methods).
+  2292→         *
+  2293→         * If multiple payment methods are passed, Checkout will dynamically reorder them to
+  2294→         * prioritize the most relevant payment methods based on the customer's location and
+  2295→         * other characteristics.
+  2296→         */
+  2297→        payment_method_types?: Array<SessionCreateParams.PaymentMethodType>;
+  2298→        /**
+  2299→         * This property is used to set up permissions for various actions (e.g., update) on the CheckoutSession object. Can only be set when creating `embedded` or `custom` sessions.
+  2300→         *
+  2301→         * For specific permissions, please refer to their dedicated subsections, such as `permissions.update_shipping_details`.
+  2302→         */
+  2303→        permissions?: SessionCreateParams.Permissions;
+  2304→        /**
+  2305→         * Controls phone number collection settings for the session.
+  2306→         *
+  2307→         * We recommend that you review your privacy policy and check with your legal contacts
+  2308→         * before using this feature. Learn more about [collecting phone numbers with Checkout](https://docs.stripe.com/payments/checkout/phone-numbers).
+  2309→         */
+  2310→        phone_number_collection?: SessionCreateParams.PhoneNumberCollection;
+  2311→        /**
+  2312→         * This parameter applies to `ui_mode: embedded_page`. Learn more about the [redirect behavior](https://docs.stripe.com/payments/checkout/custom-success-page?payment-ui=embedded-form) of embedded sessions. Defaults to `always`.
+  2313→         */
+  2314→        redirect_on_completion?: SessionCreateParams.RedirectOnCompletion;
+  2315→        /**
+  2316→         * The URL to redirect your customer back to after they authenticate or cancel their payment on the
+  2317→         * payment method's app or site. This parameter is required if `ui_mode` is `embedded_page` or `elements`
+  2318→         * and redirect-based payment methods are enabled on the session.
+  2319→         */
+  2320→        return_url?: string;
+  2321→        /**
+  2322→         * Controls saved payment method settings for the session. Only available in `payment` and `subscription` mode.
+  2323→         */
+  2324→        saved_payment_method_options?: SessionCreateParams.SavedPaymentMethodOptions;
+  2325→        /**
+  2326→         * A subset of parameters to be passed to SetupIntent creation for Checkout Sessions in `setup` mode.
+  2327→         */
+  2328→        setup_intent_data?: SessionCreateParams.SetupIntentData;
+  2329→        /**
+  2330→         * When set, provides configuration for Checkout to collect a shipping address from a customer.
+  2331→         */
+  2332→        shipping_address_collection?: SessionCreateParams.ShippingAddressCollection;
+  2333→        /**
+  2334→         * The shipping rate options to apply to this Session. Up to a maximum of 5.
+  2335→         */
+  2336→        shipping_options?: Array<SessionCreateParams.ShippingOption>;
+  2337→        /**
+  2338→         * Describes the type of transaction being performed by Checkout in order
+  2339→         * to customize relevant text on the page, such as the submit button.
+  2340→         *  `submit_type` can only be specified on Checkout Sessions in
+  2341→         * `payment` or `subscription` mode. If blank or `auto`, `pay` is used.
+  2342→         * You can't set this parameter if `ui_mode` is `elements`.
+  2343→         */
+  2344→        submit_type?: SessionCreateParams.SubmitType;
+  2345→        /**
+  2346→         * A subset of parameters to be passed to subscription creation for Checkout Sessions in `subscription` mode.
+  2347→         */
+  2348→        subscription_data?: SessionCreateParams.SubscriptionData;
+  2349→        /**
+  2350→         * The URL to which Stripe should send customers when payment or setup
+  2351→         * is complete.
+  2352→         * This parameter is not allowed if ui_mode is `embedded_page` or `elements`. If you'd like to use
+  2353→         * information from the successful Checkout Session on your page, read the
+  2354→         * guide on [customizing your success page](https://docs.stripe.com/payments/checkout/custom-success-page).
+  2355→         */
+  2356→        success_url?: string;
+  2357→        /**
+  2358→         * Controls tax ID collection during checkout.
+  2359→         */
+  2360→        tax_id_collection?: SessionCreateParams.TaxIdCollection;
+  2361→        /**
+  2362→         * The UI mode of the Session. Defaults to `hosted_page`.
+  2363→         */
+  2364→        ui_mode?: SessionCreateParams.UiMode;
+  2365→        /**
+  2366→         * Wallet-specific configuration.
+  2367→         */
+  2368→        wallet_options?: SessionCreateParams.WalletOptions;
+  2369→    }
+  2370→    namespace SessionCreateParams {
+  2371→        interface AdaptivePricing {
+  2372→            /**
+  2373→             * If set to `true`, Adaptive Pricing is available on [eligible sessions](https://docs.stripe.com/payments/currencies/localize-prices/adaptive-pricing?payment-ui=stripe-hosted#restrictions). Defaults to your [dashboard setting](https://dashboard.stripe.com/settings/adaptive-pricing).
+  2374→             */
+  2375→            enabled?: boolean;
+  2376→        }
+  2377→        interface AfterExpiration {
+  2378→            /**
+  2379→             * Configure a Checkout Session that can be used to recover an expired session.
+  2380→             */
+  2381→            recovery?: AfterExpiration.Recovery;
+  2382→        }
+  2383→        interface AutomaticTax {
+  2384→            /**
+  2385→             * Set to `true` to [calculate tax automatically](https://docs.stripe.com/tax) using the customer's location.
+  2386→             *
+  2387→             * Enabling this parameter causes Checkout to collect any billing address information necessary for tax calculation.
+  2388→             */
+  2389→            enabled: boolean;
+  2390→            /**
+  2391→             * The account that's liable for tax. If set, the business address and tax registrations required to perform the tax calculation are loaded from this account. The tax transaction is returned in the report of the connected account.
+  2392→             */
+  2393→            liability?: AutomaticTax.Liability;
+  2394→        }
+  2395→        type BillingAddressCollection = 'auto' | 'required';
+  2396→        interface BrandingSettings {
+  2397→            /**
+  2398→             * A hex color value starting with `#` representing the background color for the Checkout Session.
+  2399→             */
+  2400→            background_color?: Emptyable<string>;
+  2401→            /**
+  2402→             * The border style for the Checkout Session.
+  2403→             */
+  2404→            border_style?: Emptyable<BrandingSettings.BorderStyle>;
+  2405→            /**
+  2406→             * A hex color value starting with `#` representing the button color for the Checkout Session.
+  2407→             */
+  2408→            button_color?: Emptyable<string>;
+  2409→            /**
+  2410→             * A string to override the business name shown on the Checkout Session. This only shows at the top of the Checkout page, and your business name still appears in terms, receipts, and other places.
+  2411→             */
+  2412→            display_name?: string;
+  2413→            /**
+  2414→             * The font family for the Checkout Session corresponding to one of the [supported font families](https://docs.stripe.com/payments/checkout/customization/appearance?payment-ui=stripe-hosted#font-compatibility).
+  2415→             */
+  2416→            font_family?: Emptyable<BrandingSettings.FontFamily>;
+  2417→            /**
+  2418→             * The icon for the Checkout Session. For best results, use a square image.
+  2419→             */
+  2420→            icon?: BrandingSettings.Icon;
+  2421→            /**
+  2422→             * The logo for the Checkout Session.
+  2423→             */
+  2424→            logo?: BrandingSettings.Logo;
+  2425→        }
+  2426→        interface ConsentCollection {
+  2427→            /**
+  2428→             * Determines the display of payment method reuse agreement text in the UI. If set to `hidden`, it will hide legal text related to the reuse of a payment method.
+  2429→             */
+  2430→            payment_method_reuse_agreement?: ConsentCollection.PaymentMethodReuseAgreement;
+  2431→            /**
+  2432→             * If set to `auto`, enables the collection of customer consent for promotional communications. The Checkout
+  2433→             * Session will determine whether to display an option to opt into promotional communication
+  2434→             * from the merchant depending on the customer's locale. Only available to US merchants and US customers.
+  2435→             */
+  2436→            promotions?: ConsentCollection.Promotions;
+  2437→            /**
+  2438→             * If set to `required`, it requires customers to check a terms of service checkbox before being able to pay.
+  2439→             * There must be a valid terms of service URL set in your [Dashboard settings](https://dashboard.stripe.com/settings/public).
+  2440→             */
+  2441→            terms_of_service?: ConsentCollection.TermsOfService;
+  2442→        }
+  2443→        interface CustomField {
+  2444→            /**
+  2445→             * Configuration for `type=dropdown` fields.
+  2446→             */
+  2447→            dropdown?: CustomField.Dropdown;
+  2448→            /**
+  2449→             * String of your choice that your integration can use to reconcile this field. Must be unique to this field, alphanumeric, and up to 200 characters.
+  2450→             */
+  2451→            key: string;
+  2452→            /**
+  2453→             * The label for the field, displayed to the customer.
+  2454→             */
+  2455→            label: CustomField.Label;
+  2456→            /**
+  2457→             * Configuration for `type=numeric` fields.
+  2458→             */
+  2459→            numeric?: CustomField.Numeric;
+  2460→            /**
+  2461→             * Whether the customer is required to complete the field before completing the Checkout Session. Defaults to `false`.
+  2462→             */
+  2463→            optional?: boolean;
+  2464→            /**
+  2465→             * Configuration for `type=text` fields.
+  2466→             */
+  2467→            text?: CustomField.Text;
+  2468→            /**
+  2469→             * The type of the field.
+  2470→             */
+  2471→            type: CustomField.Type;
+  2472→        }
+  2473→        interface CustomText {
+  2474→            /**
+  2475→             * Custom text that should be displayed after the payment confirmation button.
+  2476→             */
+  2477→            after_submit?: Emptyable<CustomText.AfterSubmit>;
+  2478→            /**
+  2479→             * Custom text that should be displayed alongside shipping address collection.
+  2480→             */
+  2481→            shipping_address?: Emptyable<CustomText.ShippingAddress>;
+  2482→            /**
+  2483→             * Custom text that should be displayed alongside the payment confirmation button.
+  2484→             */
+  2485→            submit?: Emptyable<CustomText.Submit>;
+  2486→            /**
+  2487→             * Custom text that should be displayed in place of the default terms of service agreement text.
+  2488→             */
+  2489→            terms_of_service_acceptance?: Emptyable<CustomText.TermsOfServiceAcceptance>;
+  2490→        }
+  2491→        type CustomerCreation = 'always' | 'if_required';
+  2492→        interface CustomerUpdate {
+  2493→            /**
+  2494→             * Describes whether Checkout saves the billing address onto `customer.address`.
+  2495→             * To always collect a full billing address, use `billing_address_collection`. Defaults to `never`.
+  2496→             */
+  2497→            address?: CustomerUpdate.Address;
+  2498→            /**
+  2499→             * Describes whether Checkout saves the name onto `customer.name`. Defaults to `never`.
+  2500→             */
+  2501→            name?: CustomerUpdate.Name;
+  2502→            /**
+  2503→             * Describes whether Checkout saves shipping information onto `customer.shipping`.
+  2504→             * To collect shipping information, use `shipping_address_collection`. Defaults to `never`.
+  2505→             */
+  2506→            shipping?: CustomerUpdate.Shipping;
+  2507→        }
+  2508→        interface Discount {
+  2509→            /**
+  2510→             * The ID of the coupon to apply to this Session.
+  2511→             */
+  2512→            coupon?: string;
+  2513→            /**
+  2514→             * The ID of a promotion code to apply to this Session.
+  2515→             */
+  2516→            promotion_code?: string;
+  2517→        }
+  2518→        type ExcludedPaymentMethodType = 'acss_debit' | 'affirm' | 'afterpay_clearpay' | 'alipay' | 'alma' | 'amazon_pay' | 'au_becs_debit' | 'bacs_debit' | 'bancontact' | 'billie' | 'bizum' | 'blik' | 'boleto' | 'card' | 'cashapp' | 'crypto' | 'customer_balance' | 'eps' | 'fpx' | 'giropay' | 'grabpay' | 'ideal' | 'kakao_pay' | 'klarna' | 'konbini' | 'kr_card' | 'mb_way' | 'mobilepay' | 'multibanco' | 'naver_pay' | 'nz_bank_account' | 'oxxo' | 'p24' | 'pay_by_bank' | 'payco' | 'paynow' | 'paypal' | 'payto' | 'pix' | 'promptpay' | 'revolut_pay' | 'samsung_pay' | 'satispay' | 'scalapay' | 'sepa_debit' | 'sofort' | 'sunbit' | 'swish' | 'twint' | 'upi' | 'us_bank_account' | 'wechat_pay' | 'zip';
+  2519→        interface InvoiceCreation {
+  2520→            /**
+  2521→             * Set to `true` to enable invoice creation.
+  2522→             */
+  2523→            enabled: boolean;
+  2524→            /**
+  2525→             * Parameters passed when creating invoices for payment-mode Checkout Sessions.
+  2526→             */
+  2527→            invoice_data?: InvoiceCreation.InvoiceData;
+  2528→        }
+  2529→        interface LineItem {
+  2530→            /**
+  2531→             * When set, provides configuration for this item's quantity to be adjusted by the customer during Checkout.
+  2532→             */
+  2533→            adjustable_quantity?: LineItem.AdjustableQuantity;
+  2534→            /**
+  2535→             * The [tax rates](https://docs.stripe.com/api/tax_rates) that will be applied to this line item depending on the customer's billing/shipping address. We currently support the following countries: US, GB, AU, and all countries in the EU. You can't set this parameter if `ui_mode` is `custom`.
+  2536→             */
+  2537→            dynamic_tax_rates?: Array<string>;
+  2538→            /**
+  2539→             * Set of [key-value pairs](https://docs.stripe.com/api/metadata) that you can attach to an object. This can be useful for storing additional information about the object in a structured format. Individual keys can be unset by posting an empty value to them. All keys can be unset by posting an empty value to `metadata`.
+  2540→             */
+  2541→            metadata?: MetadataParam;
+  2542→            /**
+  2543→             * The ID of the [Price](https://docs.stripe.com/api/prices) or [Plan](https://docs.stripe.com/api/plans) object. One of `price` or `price_data` is required.
+  2544→             */
+  2545→            price?: string;
+  2546→            /**
+  2547→             * Data used to generate a new [Price](https://docs.stripe.com/api/prices) object inline. One of `price` or `price_data` is required.
+  2548→             */
+  2549→            price_data?: LineItem.PriceData;
+  2550→            /**
+  2551→             * The quantity of the line item being purchased. Quantity should not be defined when `recurring.usage_type=metered`.
+  2552→             */
+  2553→            quantity?: number;
+  2554→            /**
+  2555→             * The [tax rates](https://docs.stripe.com/api/tax_rates) which apply to this line item.
+  2556→             */
+  2557→            tax_rates?: Array<string>;
+  2558→        }
+  2559→        type Locale = 'auto' | 'bg' | 'cs' | 'da' | 'de' | 'el' | 'en' | 'en-GB' | 'es' | 'es-419' | 'et' | 'fi' | 'fil' | 'fr' | 'fr-CA' | 'hr' | 'hu' | 'id' | 'it' | 'ja' | 'ko' | 'lt' | 'lv' | 'ms' | 'mt' | 'nb' | 'nl' | 'pl' | 'pt' | 'pt-BR' | 'ro' | 'ru' | 'sk' | 'sl' | 'sv' | 'th' | 'tr' | 'vi' | 'zh' | 'zh-HK' | 'zh-TW';
+  2560→        interface ManagedPayments {
+  2561→            /**
+  2562→             * Set to `true` to enable [Managed Payments](https://docs.stripe.com/payments/managed-payments), Stripe's merchant of record solution, for this session.
+  2563→             */
+  2564→            enabled?: boolean;
+  2565→        }
+  2566→        type Mode = 'payment' | 'setup' | 'subscription';
+  2567→        interface NameCollection {
+  2568→            /**
+  2569→             * Controls settings applied for collecting the customer's business name on the session.
+  2570→             */
+  2571→            business?: NameCollection.Business;
+  2572→            /**
+  2573→             * Controls settings applied for collecting the customer's individual name on the session.
+  2574→             */
+  2575→            individual?: NameCollection.Individual;
+  2576→        }
+  2577→        interface OptionalItem {
+  2578→            /**
+  2579→             * When set, provides configuration for the customer to adjust the quantity of the line item created when a customer chooses to add this optional item to their order.
+  2580→             */
+  2581→            adjustable_quantity?: OptionalItem.AdjustableQuantity;
+  2582→            /**
+  2583→             * The ID of the [Price](https://docs.stripe.com/api/prices) or [Plan](https://docs.stripe.com/api/plans) object.
+  2584→             */
+  2585→            price: string;
+  2586→            /**
+  2587→             * The initial quantity of the line item created when a customer chooses to add this optional item to their order.
+  2588→             */
+  2589→            quantity: number;
+  2590→        }
+  2591→        type OriginContext = 'mobile_app' | 'web';
+  2592→        interface PaymentIntentData {
+  2593→            /**
+  2594→             * The amount of the application fee (if any) that will be requested to be applied to the payment and transferred to the application owner's Stripe account. The amount of the application fee collected will be capped at the total amount captured. For more information, see the PaymentIntents [use case for connected accounts](https://docs.stripe.com/payments/connected-accounts).
+  2595→             */
+  2596→            application_fee_amount?: number;
+  2597→            /**
+  2598→             * Controls when the funds will be captured from the customer's account.
+  2599→             */
+  2600→            capture_method?: PaymentIntentData.CaptureMethod;
+  2601→            /**
+  2602→             * An arbitrary string attached to the object. Often useful for displaying to users.
+  2603→             */
+  2604→            description?: string;
+  2605→            /**
+  2606→             * Set of [key-value pairs](https://docs.stripe.com/api/metadata) that you can attach to an object. This can be useful for storing additional information about the object in a structured format. Individual keys can be unset by posting an empty value to them. All keys can be unset by posting an empty value to `metadata`.
+  2607→             */
+  2608→            metadata?: MetadataParam;
+  2609→            /**
+  2610→             * The Stripe account ID for which these funds are intended. For details,
+  2611→             * see the PaymentIntents [use case for connected
+  2612→             * accounts](https://docs.stripe.com/docs/payments/connected-accounts).
+  2613→             */
+  2614→            on_behalf_of?: string;
+  2615→            /**
+  2616→             * Email address that the receipt for the resulting payment will be sent to. If `receipt_email` is specified for a payment in live mode, a receipt will be sent regardless of your [email settings](https://dashboard.stripe.com/account/emails).
+  2617→             */
+  2618→            receipt_email?: string;
+  2619→            /**
+  2620→             * Indicates that you intend to [make future payments](https://docs.stripe.com/payments/payment-intents#future-usage) with the payment
+  2621→             * method collected by this Checkout Session.
+  2622→             *
+  2623→             * When setting this to `on_session`, Checkout will show a notice to the
+  2624→             * customer that their payment details will be saved.
+  2625→             *
+  2626→             * When setting this to `off_session`, Checkout will show a notice to the
+  2627→             * customer that their payment details will be saved and used for future
+  2628→             * payments.
+  2629→             *
+  2630→             * If a Customer has been provided or Checkout creates a new Customer,
+  2631→             * Checkout will attach the payment method to the Customer.
+  2632→             *
+  2633→             * If Checkout does not create a Customer, the payment method is not attached
+  2634→             * to a Customer. To reuse the payment method, you can retrieve it from the
+  2635→             * Checkout Session's PaymentIntent.
+  2636→             *
+  2637→             * When processing card payments, Checkout also uses `setup_future_usage`
+  2638→             * to dynamically optimize your payment flow and comply with regional
+  2639→             * legislation and network rules, such as SCA.
+  2640→             */
+  2641→            setup_future_usage?: PaymentIntentData.SetupFutureUsage;
+  2642→            /**
+  2643→             * Shipping information for this payment.
+  2644→             */
+  2645→            shipping?: PaymentIntentData.Shipping;
+  2646→            /**
+  2647→             * Text that appears on the customer's statement as the statement descriptor for a non-card charge. This value overrides the account's default statement descriptor. For information about requirements, including the 22-character limit, see [the Statement Descriptor docs](https://docs.stripe.com/get-started/account/statement-descriptors).
+  2648→             *
+  2649→             * Setting this value for a card charge returns an error. For card charges, set the [statement_descriptor_suffix](https://docs.stripe.com/get-started/account/statement-descriptors#dynamic) instead.
+  2650→             */
+  2651→            statement_descriptor?: string;
+  2652→            /**
+  2653→             * Provides information about a card charge. Concatenated to the account's [statement descriptor prefix](https://docs.stripe.com/get-started/account/statement-descriptors#static) to form the complete statement descriptor that appears on the customer's statement.
+  2654→             */
+  2655→            statement_descriptor_suffix?: string;
+  2656→            /**
+  2657→             * The parameters used to automatically create a Transfer when the payment succeeds.
+  2658→             * For more information, see the PaymentIntents [use case for connected accounts](https://docs.stripe.com/payments/connected-accounts).
+  2659→             */
+  2660→            transfer_data?: PaymentIntentData.TransferData;
+  2661→            /**
+  2662→             * A string that identifies the resulting payment as part of a group. See the PaymentIntents [use case for connected accounts](https://docs.stripe.com/connect/separate-charges-and-transfers) for details.
+  2663→             */
+  2664→            transfer_group?: string;
+  2665→        }
+  2666→        type PaymentMethodCollection = 'always' | 'if_required';
+  2667→        interface PaymentMethodData {
+  2668→            /**
+  2669→             * Allow redisplay will be set on the payment method on confirmation and indicates whether this payment method can be shown again to the customer in a checkout flow. Only set this field if you wish to override the allow_redisplay value determined by Checkout.
+  2670→             */
+  2671→            allow_redisplay?: PaymentMethodData.AllowRedisplay;
+  2672→        }
+  2673→        interface PaymentMethodOptions {
+  2674→            /**
+  2675→             * contains details about the ACSS Debit payment method options. You can't set this parameter if `ui_mode` is `elements`.
+  2676→             */
+  2677→            acss_debit?: PaymentMethodOptions.AcssDebit;
+  2678→            /**
+  2679→             * contains details about the Affirm payment method options.
+  2680→             */
+  2681→            affirm?: PaymentMethodOptions.Affirm;
+  2682→            /**
+  2683→             * contains details about the Afterpay Clearpay payment method options.
+  2684→             */
+  2685→            afterpay_clearpay?: PaymentMethodOptions.AfterpayClearpay;
+  2686→            /**
+  2687→             * contains details about the Alipay payment method options.
+  2688→             */
+  2689→            alipay?: PaymentMethodOptions.Alipay;
+  2690→            /**
+  2691→             * contains details about the Alma payment method options.
+  2692→             */
+  2693→            alma?: PaymentMethodOptions.Alma;
+  2694→            /**
+  2695→             * contains details about the AmazonPay payment method options.
+  2696→             */
+  2697→            amazon_pay?: PaymentMethodOptions.AmazonPay;
+  2698→            /**
+  2699→             * contains details about the AU Becs Debit payment method options.
+  2700→             */
+  2701→            au_becs_debit?: PaymentMethodOptions.AuBecsDebit;
+  2702→            /**
+  2703→             * contains details about the Bacs Debit payment method options.
+  2704→             */
+  2705→            bacs_debit?: PaymentMethodOptions.BacsDebit;
+  2706→            /**
+  2707→             * contains details about the Bancontact payment method options.
+  2708→             */
+  2709→            bancontact?: PaymentMethodOptions.Bancontact;
+  2710→            /**
+  2711→             * contains details about the Billie payment method options.
+  2712→             */
+  2713→            billie?: PaymentMethodOptions.Billie;
+  2714→            /**
+
+[showing lines 2115-2714 of 5101; use offset=2715 with limit to continue reading]
