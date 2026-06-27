@@ -1,0 +1,314 @@
+     1→# stripe-mcp — Worklog
+     2→
+     3→Project: The most complete open-source MCP server for Stripe, plus a viral landing page.
+     4→
+     5→Environment: Next.js 16 app at `/home/z/my-project` (visible at `/`).
+     6→Package code: `/home/z/my-project/stripe-mcp/` (standalone TypeScript MCP server).
+     7→
+     8→## Status
+     9→- Phase: 1 — Foundation (in progress)
+    10→
+    11→## Goals
+    12→- Build complete stripe-mcp package (60+ tools, utils, config, server, tests, docs).
+    13→- Build stunning viral landing page at `/` showcasing the package.
+    14→- All quality gates pass.
+    15→- Set up 15-min webDevReview cron.
+    16→
+    17→## Architecture decisions
+    18→- Package lives in `stripe-mcp/` subdir, fully independent of Next.js app.
+    19→- Each tool category self-contains its files; `src/tools/index.ts` pre-wires all imports (no merge conflicts for parallel agents).
+    20→- Landing page uses a static tools dataset (`src/lib/stripe-mcp-tools.ts`) generated from the package structure so the page renders instantly.
+    21→- Landing page aesthetic: dark developer-focused (Stripe/Linear/Vercel vibes), NOT indigo/blue — use a violet/emerald accent on near-black.
+    22→
+    23→## Next steps
+    24→- Write foundation files (config, utils, types, server, barrel).
+    25→- Launch parallel tool-category subagents.
+    26→- Build landing page in parallel.
+    27→
+    28→---
+    29→Task ID: 2-c
+    30→Agent: general-purpose (payment-intents/refunds/disputes/webhooks)
+    31→Task: Implement payment-intents (5), refunds (3), disputes (4), webhooks (5) tool categories.
+    32→
+    33→Work Log:
+    34→- Read worklog, foundation (types, config, utils), and top-level tools/index.ts barrel to confirm imports and contract.
+    35→- Created src/tools/payment-intents/ with 5 tool files (create/get/confirm/cancel/list) + index.ts barrel exporting `tools`.
+    36→- Created src/tools/refunds/ with 3 tool files (create/get/list) + index.ts barrel.
+    37→- Created src/tools/disputes/ with 4 tool files (get/update/close/list) + index.ts barrel. close-dispute uses stripe.disputes.close(id).
+    38→- Created src/tools/webhooks/ with 5 tool files (create/get/update/delete/list) + index.ts barrel. All use stripe.webhookEndpoints resource; delete uses .del(id).
+    39→- Each tool follows the exact template: zod inputSchema mirrored into JSON-Schema inputSchema, buildStripeParams<P>(parsed.data) for SDK calls, formatStripeError on catch, never throws.
+    40→- List tools auto-paginate via paginateAll<T> with optional max_items cap and wrap results in listEnvelope<T> ({ total_count, has_more, data }).
+    41→- Used z.enum for fixed options (cancellation_reason, reason, status). Used z.record(z.string(), z.string()) for metadata and dispute evidence. Used z.array(z.string()) for webhook enabled_events.
+    42→- All relative imports use .js ESM extensions; imported Stripe via `import type Stripe from 'stripe'`.
+    43→
+    44→Stage Summary:
+    45→- Files created: 21 total (17 tool files + 4 index.ts barrels across the 4 categories).
+    46→- Tool count: 17 tools (5 payment-intents + 3 refunds + 4 disputes + 5 webhooks), all named per spec (`stripe_<category>_<action>`).
+    47→- Verification: `npx tsc --noEmit` shows NO errors in any of my files (payment-intents, refunds, disputes, webhooks). Remaining tsc errors are confined to other categories' missing index.ts files and pre-existing foundation issues (src/config.ts LatestApiVersion, src/utils/format-stripe-error.ts Stripe.Error, src/tools/customers and payouts missing args) — none owned by this task.
+    48→
+    49→---
+    50→Task ID: 6
+    51→Agent: full-stack-developer (landing page)
+    52→Task: Build stunning viral landing page at / for stripe-mcp.
+    53→
+    54→Work Log:
+    55→- Read worklog + project layout; confirmed Next.js 16 app at /home/z/my-project with shadcn/ui, framer-motion, lucide-react, Geist fonts already wired.
+    56→- Created `src/lib/stripe-mcp-tools.ts` — typed catalogue of all 79 tools across 19 categories with description + realistic example prompt per tool, plus `categories` array and `categoryColors` map (violet/emerald/amber/rose palette, no indigo/blue).
+    57→- Created `src/hooks/use-copy-to-clipboard.ts` — small client hook with transient "copied" flag and legacy execCommand fallback for insecure contexts.
+    58→- Updated `src/app/layout.tsx` metadata (title, description, keywords, OG, Twitter) to reflect stripe-mcp.
+    59→- Added landing-page CSS extras to `src/app/globals.css`: `.smcp-scrollbar` custom scrollbar, `.smcp-gradient-text` animated gradient pan, `.smcp-float` float keyframes, `.smcp-caret` blinking caret for the typing animation.
+    60→- Wrote `src/app/page.tsx` as a single `'use client'` page with 12 sections in order: (1) sticky blurred-on-scroll nav with npm install copy pill + GitHub CTA; (2) hero with gradient headline, badges, dual CTAs, and a floating terminal card that types out a mock Claude MRR conversation with by-plan bar chart + top-customer callout; (3) stats strip (79 tools / 19 categories / 1-command / 0 servers); (4) "Works with" row (Claude Desktop, Cursor, Windsurf, Any MCP client) with checkmarks; (5) Quickstart 3 steps with copy buttons incl. full claude_desktop_config.json snippet; (6) searchable + category-filterable tools table with sticky header, custom scrollbar, max-h scroll, "Showing X of 79" count, mono tool pills, colored category chips, italic example prompts; (7) Analytics "crown jewel" spotlight with violet→emerald gradient glow border and 5 mini-dashboard cards (MRR big number + bar chart, Churn rate + downward sparkline SVG, Revenue Summary 3-up + sparkline, Top Customers ranked list, Failed Payments breakdown bars) plus a CTA card; (8) example-prompt chat-bubble grid (6 prompts); (9) Safety section — two columns read-only (emerald) vs mutating (amber) tool lists + a live-vs-test mode callout with mock startup banner; (10) features grid (ESM-first, Zod-validated, auto-pagination, typed errors, formatted money, dual dates, mocked tests, 1-command install); (11) final CTA gradient panel with install command + GitHub button; (12) footer with brand + Tools/Resources/Community nav columns, MIT badge, bottom row "MIT License · Built for GitHub virality" + ⚡, made sticky via `min-h-screen flex flex-col` wrapper + `mt-auto` footer.
+    61→- Used shadcn Button/Badge/Input/Tooltip, framer-motion `motion.div whileInView` for scroll reveals (with `useReducedMotion` guard), lucide-react icons throughout.
+    62→- Verified: `bun run lint` passes clean; `curl /` returns HTTP 200; dev.log shows no errors/warnings; SSR HTML contains "stripe-mcp", "most complete MCP", "79 tools", "Analytics", "Quickstart", "MIT".
+    63→
+    64→Stage Summary:
+    65→- Files created: `src/lib/stripe-mcp-tools.ts` (79 tools + categories + color map), `src/hooks/use-copy-to-clipboard.ts`.
+    66→- Files modified: `src/app/page.tsx` (full landing page rewrite), `src/app/layout.tsx` (metadata), `src/app/globals.css` (scrollbar + animation keyframes).
+    67→- Lint: clean. Runtime: HTTP 200, no errors in dev.log. Responsive: mobile-first (nav collapses, hero stacks, table scrolls horizontally, grids 1→2→3/4 col). Accessibility: semantic header/nav/main/section/footer, aria-labels on icon buttons, keyboard-focusable controls. Sticky footer rule satisfied. Dark violet/emerald aesthetic on #070710 with radial glows + grid overlay — no indigo/blue.
+    68→
+    69→---
+    70→Task ID: 2-a
+    71→Agent: general-purpose (customers/products/prices)
+    72→Task: Implement customers (6), products (5), prices (4) tool categories.
+    73→
+    74→Work Log:
+    75→- Read existing foundation (config.ts, types/index.ts, utils/object.ts, pagination.ts, format-stripe-error.ts, currency.ts, date.ts, tools/index.ts barrel) and the Stripe SDK type defs for Customers / Products / Prices to verify exact method/param signatures.
+    76→- Created src/tools/customers/ with 6 tools + index.ts:
+    77→  - create-customer.ts (email, name, phone, description, metadata, nested address + shipping schemas)
+    78→  - get-customer.ts (customer_id required, expand for default_payment_method / subscriptions)
+    79→  - update-customer.ts (customer_id required, email/name/phone/description/metadata)
+    80→  - delete-customer.ts (customer_id required, returns DeletedCustomer)
+    81→  - list-customers.ts (auto-paginate via paginateAll, optional email filter, max_items cap, wrapped as {total_count, has_more, data})
+    82→  - search-customers.ts (Stripe search API with query + limit + page)
+    83→  - index.ts exporting `tools` array
+    84→- Created src/tools/products/ with 5 tools + index.ts:
+    85→  - create-product.ts (name required, description, images, default_price, metadata, active)
+    86→  - get-product.ts (product_id required, expand)
+    87→  - update-product.ts (product_id required, name/description/images/metadata/active/default_price)
+    88→  - archive-product.ts (product_id required; uses products.update(id, {active: false}))
+    89→  - list-products.ts (auto-paginate, optional active/ids filters, max_items cap)
+    90→  - index.ts exporting `tools` array
+    91→- Created src/tools/prices/ with 4 tools + index.ts:
+    92→  - create-price.ts (unit_amount + currency required, product OR product_data via zod .refine, optional recurring {interval, interval_count}, nickname, lookup_key, metadata, active)
+    93→  - get-price.ts (price_id required, expand)
+    94→  - update-price.ts (price_id required, nickname/lookup_key/metadata/active)
+    95→  - list-prices.ts (auto-paginate, optional active/product/type filters, max_items cap)
+    96→  - index.ts exporting `tools` array
+    97→- All tool files follow the exact template: zod input schema mirrored as JSON Schema in `inputSchema.properties` + `required`, `buildStripeParams<Stripe.XxxParams>(parsed.data)` for every Stripe SDK call, `formatStripeError` for all catch blocks, `JSON.stringify(result, null, 2)` output, no `any` type.
+    98→- First `npx tsc --noEmit` run flagged `z.record(z.string())` (Zod 4.4.3 requires `z.record(keyType, valueType)`). Fixed all 6 occurrences (create-customer, update-customer, create-product, update-product, create-price, update-price) by switching to `z.record(z.string(), z.string())`.
+    99→- Re-ran `npx tsc --noEmit`: zero errors in customers/products/prices files. Remaining errors are exclusively in other agents' files (analytics, invoices, payouts, subscriptions, tax) and in pre-existing foundation (config.ts `Stripe.LatestApiVersion`, format-stripe-error.ts `Stripe.Error`) — explicitly out of scope per task instructions.
+   100→
+   101→Stage Summary:
+   102→- Files created: 18 total (15 tool files + 3 category index.ts) across src/tools/customers/, src/tools/products/, src/tools/prices/.
+   103→- Tool count: 15 (customers: 6, products: 5, prices: 4).
+   104→- All files pass `tsc --noEmit` clean (verified by grep filtering tsc output for `src/tools/(customers|products|prices)/` → "NO ERRORS IN CUSTOMERS/PRODUCTS/PRICES FILES").
+   105→- No issues / blockers. The three category `tools` arrays are ready to be spread into the top-level `allTools` barrel once other categories are in place.
+   106→
+   107→---
+   108→Task ID: 2-b
+   109→Agent: general-purpose (subscriptions/invoices)
+   110→Task: Implement subscriptions (8) and invoices (6) tool categories.
+   111→
+   112→Work Log:
+   113→- Read worklog + foundation files (types, config, utils: object/pagination/format-stripe-error/currency/date) to confirm conventions and the `buildStripeParams` + `paginateAll` patterns.
+   114→- Inspected Stripe SDK type declarations (`Subscriptions.d.ts`, `Invoices.d.ts`, `shared.d.ts`) to pin exact param interfaces, enums (ProrationBehavior, SubscriptionListParams.Status, PauseCollection.Behavior, InvoiceListParams.Status), and the `SubscriptionUpdateParams.PauseCollection.behavior` required-field quirk.
+   115→- Created `src/tools/subscriptions/` with 8 tool files: create, get, update, cancel, pause, resume, list, search — plus `index.ts` barrel exporting `tools`.
+   116→- Created `src/tools/invoices/` with 6 tool files: get, list, pay, void, finalize, send — plus `index.ts` barrel exporting `tools`.
+   117→- Every tool follows the canonical template: zod input schema (every field `.describe()`-d), mirrored JSON Schema in `definition.inputSchema`, `safeParse` validation, `buildStripeParams<P>` for Stripe SDK calls, `JSON.stringify(result, null, 2)` on success, `formatStripeError` on failure. List tools auto-paginate via `paginateAll` and return `{ total_count, has_more, data }`.
+   118→- Resolved three strict-mode issues surfaced by `tsc --noEmit`:
+   119→  1. `z.record(z.string())` → `z.record(z.string(), z.string())` (zod v4 requires key+value schemas) in create-subscription and update-subscription.
+   120→  2. `pause-subscription`: `SubscriptionUpdateParams.PauseCollection.behavior` is required by Stripe's type — defaulted to `'void'` (Stripe's documented default) when caller omits it.
+   121→  3. `list-invoices`: removed `'deleted'` from the status enum — Stripe's `InvoiceListParams.Status` only accepts `draft|open|paid|uncollectible|void`. Documented the valid set in the field description.
+   122→- For cancel-subscription, used Stripe's actual `cancellation_details` shape `{ comment, feedback }` (Stripe's cancel API does not accept `reason`; `reason` is a response-only field set internally by Stripe). Documented the mapping in the field description.
+   123→- For search-subscriptions, returned the first search page wrapped in the standard `{ total_count, has_more, data }` envelope; documented that Stripe search uses `next_page` pagination (intentionally not auto-paginated to keep search responsive).
+   124→- Verified: `npx tsc --noEmit` reports zero errors in `src/tools/subscriptions/**` and `src/tools/invoices/**`. Remaining tsc errors are in other categories' files (analytics/payouts/tax/config/format-stripe-error + missing barrels for checkout/billing-portal/balance) — outside this task's scope per instructions.
+   125→
+   126→Stage Summary:
+   127→- Files created: 16 (8 subscription tools + 6 invoice tools + 2 category barrels).
+   128→- Tools registered: 14 (8 subscriptions + 6 invoices), all named `stripe_<category>_<action>` per spec.
+   129→- Top-level `src/tools/index.ts` already imports `subscriptions/index.js` and `invoices/index.js` — both now resolve and export `tools: ToolDefinition[]`.
+   130→- No errors in own files. No `any` used (all params typed via Stripe SDK types + zod inference, cast through `Record<string, unknown>` only inside `buildStripeParams`).
+   131→
+   132→---
+   133→Task ID: 2-e
+   134→Agent: general-purpose (payouts/tax/meters/analytics)
+   135→Task: Implement payouts (4), tax (3), meters (3), analytics (5) tool categories.
+   136→
+   137→Work Log:
+   138→- Read foundation files (config, types, utils) and inspected Stripe SDK type definitions for Payout, TaxRate, Billing.Meter, Charge, Subscription, Customer.
+   139→- Discovered the SDK only exposes `formula: 'sum'|'count'|'last'` and `customer_mapping.type: 'by_id'` on MeterCreateParams (spec mentioned 'max'|'min' and 'id'|'email' which are not supported by the actual API — honored the SDK to keep types strict). `default_aggregation` is required, not optional.
+   140→- Created payouts tools: create-payout, get-payout, cancel-payout, list-payouts. List tool auto-paginates and wraps with `listEnvelope`.
+   141→- Created tax tools: create-tax-rate (with active default true), get-tax-rate, list-tax-rates (filter by active).
+   142→- Created meters tools using `stripe.billing.meters.{create,retrieve,list}` typed surface.
+   143→- Created the five analytics crown-jewel tools:
+   144→  - get-mrr: paginates active (and optionally trialing) subscriptions with expanded customer + price, sums per-item MRR via `normalizeToMonthly`, returns total_mrr, formatted, by_plan, by_currency, top 10 customers.
+   145→  - get-churn-rate: single fetch of all subscriptions created before period_end, then computes active_at_period_start and churned_in_period client-side; includes per-customer LTV estimate and cancellation_details.reason.
+   146→  - get-revenue-summary: paginates charges in resolved period, computes gross/net/refund/failure stats, builds day or month buckets for time series.
+   147→  - get-top-customers: ranks customers by lifetime_value / mrr / payment_count; for LTV/count fetches charges (filtered client-side for succeeded), for MRR uses active subscriptions.
+   148→  - get-failed-payments-report: paginates charges in lookback window (filtered client-side for failed), builds decline-code breakdown, per-customer failure summary, and recovery_suggestion map.
+   149→- Fixed all TypeScript errors in my scope:
+   150→  - `z.record(z.string())` → `z.record(z.string(), z.string())` (Zod 4 requires key+value schemas).
+   151→  - Customer `name?` field is `string | null | undefined`; coerced with `?? null` to match declared interface shape.
+   152→  - `Stripe.ChargeListParams` does not expose a `status` filter in this SDK version, so filtered charges client-side (status === 'failed' / 'succeeded') after paginating by created range.
+   153→
+   154→Stage Summary:
+   155→- Files created: 19 total (4 payouts + 3 tax + 3 meters + 5 analytics tools, plus 4 category index.ts files).
+   156→- Tool count added: 15 tools registered into `allTools` via the pre-wired barrel.
+   157→- `npx tsc --noEmit`: ZERO errors in payouts/tax/meters/analytics files. The only remaining project-level errors are in foundation files (`src/config.ts`, `src/utils/format-stripe-error.ts`) and belong to other agents — not in my scope.
+   158→- No `any` used anywhere; all Stripe SDK calls go through `buildStripeParams<P>` or direct typed params; all analytics use `paginateAll<T>` with explicit generics.
+   159→
+   160→---
+   161→Task ID: 2-d
+   162→Agent: general-purpose (coupons/promotion-codes/payment-links/checkout/billing-portal/balance)
+   163→Task: Implement coupons (4), promotion-codes (3), payment-links (4), checkout (4), billing-portal (1), balance (2) tool categories.
+   164→
+   165→Work Log:
+   166→- Read foundation files (types, config, utils for object/pagination/format-stripe-error/currency/date) and the top-level tools/index.ts barrel to confirm import contracts.
+   167→- Inspected installed Stripe SDK type definitions (Coupons.d.ts, PromotionCodes.d.ts, PaymentLinks.d.ts, Checkout/Sessions.d.ts, BillingPortal/Sessions.d.ts, Balance.d.ts, BalanceTransactions.d.ts) to verify the exact param-type shapes (e.g. PromotionCodeCreateParams wraps the coupon id inside `promotion: { coupon, type: 'coupon' }`, Checkout types live under `Stripe.Checkout.*`, BillingPortal under `Stripe.BillingPortal.*`).
+   168→- Created 24 files across 6 new directories under src/tools/: coupons (create, get, delete, list), promotion-codes (create, get, list), payment-links (create, get, update, list), checkout (create, get, expire, list), billing-portal (create), balance (get, list-transactions), plus an index.ts barrel for each category that exports a `tools` array.
+   169→- Every tool follows the required template: zod inputSchema with .describe() on every field, mirrored JSON Schema in inputSchema.properties, z.enum for fixed options, ToolDefinition export with name `stripe_<category>_<action>`, execute() that safeParses, calls Stripe via buildStripeParams<Stripe.*Params>, JSON.stringify(result, null, 2) on success, formatStripeError on failure — never throws.
+   170→- LIST tools auto-paginate with paginateAll, wrap output as { total_count, has_more, data } via listEnvelope. Honored caller-provided starting_after as the initial cursor by injecting it into the first fetchPage call inside a small closure, and used max_items ?? limit as the paginateAll maxItems cap.
+   171→- Handled the promotion-code shape mismatch by destructuring `coupon` out of parsed.data and constructing `promotion: { coupon, type: 'coupon' as const }` before buildStripeParams.
+   172→- Used z.record(z.string(), z.unknown()) for loosely-typed nested objects (subscription_data, payment_intent_data, billing-portal flow_data) to stay flexible while keeping strict mode + exactOptionalPropertyTypes happy.
+   173→- Ran `npx tsc --noEmit`; filtered output for my six categories — zero errors in my files. Only two pre-existing errors remain, both in foundation files outside my scope (src/config.ts: Stripe.LatestApiVersion not exported by installed SDK; src/utils/format-stripe-error.ts: Stripe.Error should be Stripe.errors).
+   174→
+   175→Stage Summary:
+   176→- Files created: 24 (18 tool files + 6 index.ts barrels).
+   177→- Tool count: 18 (coupons 4, promotion-codes 3, payment-links 4, checkout 4, billing-portal 1, balance 2).
+   178→- All tool names match the required `stripe_<category>_<action>` convention.
+   179→- npx tsc --noEmit shows no errors in any of my files; only pre-existing foundation-file errors remain (out of scope per task instructions).
+   180→- No issues or blockers; ready for the master barrel to assemble the full catalogue once all parallel categories finish.
+   181→
+   182→---
+   183→Task ID: 5
+   184→Agent: general-purpose (docs + CI)
+   185→Task: Write README, CONTRIBUTING, CHANGELOG, LICENSE, docs/tools/*.md, .github workflows.
+   186→
+   187→Work Log:
+   188→- Read worklog + every relevant source file (config.ts, server.ts, index.ts, types/index.ts, all 5 utils, all 79 tool files, tsconfig, eslint, tsup, vitest configs, CLAUDE.md, DECISIONS.md) to ground every doc claim in the actual code rather than the spec.
+   189→- Confirmed package facts: 79 tools across 19 categories, ESM-only, tsup build with #!/usr/bin/env node banner, TypeScript strict + exactOptionalPropertyTypes + noUncheckedIndexedAccess, vi.mock() tests, stdio transport, buildStripeParams<P> helper, paginateAll<T> + listEnvelope<T>, formatAmount/normalizeToMonthly/formatStripeError utils, stripeMode detection on key prefix, no apiVersion pinning (DECISIONS 008).
+   190→- Wrote LICENSE — MIT, copyright holder "stripe-mcp contributors", year 2025.
+   191→- Wrote .github/workflows/ci.yml — Node 20.x + 22.x matrix, runs typecheck/lint/build/test, npm cache, fail-fast: false.
+   192→- Wrote .github/workflows/release.yml — triggers on v* tags, publishes to npm with NPM_TOKEN, pins Node 20.x, includes id-token: write for provenance.
+   193→- Wrote CHANGELOG.md — Keep-a-Changelog format, [1.0.0] initial release listing all 79 tools by category, the analytics crown jewel, platform features (zod, pagination, dual dates, money formatting, formatStripeError, stdio, buildStripeParams, tool registry), tests & CI, docs, and known limitations.
+   194→- Wrote CONTRIBUTING.md — dev env (Node 20+), full npm script table, project structure tree, the canonical tool template (zod + safeParse + buildStripeParams + formatStripeError + paginateAll), 5-step "add a new tool" flow, explanation of why buildStripeParams<P> exists (exactOptionalPropertyTypes), code style rules (no any, zod on every input, never throw, paginateAll, formatAmount, dual dates), Conventional Commits, and a PR checklist. Links to DECISIONS.md and CLAUDE.md.
+   195→- Wrote 19 docs/tools/*.md files (analytics, balance, billing-portal, checkout, coupons, customers, disputes, invoices, meters, payment-intents, payment-links, payouts, prices, products, promotion-codes, refunds, subscriptions, tax, webhooks) — each with a category intro paragraph and per-tool sections (description, parameters table with type/required/description columns, returns shape, Stripe docs link). For analytics.md, included real example JSON output shapes for all 5 tools (MRR breakdown, churned_customers array, revenue time_series, top_customers ranked list, failed_payments decline-code breakdown + recovery-suggestion mapping) so the docs sell the feature.
+   196→- Wrote README.md — viral-optimized: ASCII ⚡ + stripe-mcp banner, six shields.io badges (npm/MIT/MCP/TypeScript/CI/stars), one-line pitch, "Why this exists" (3 bullets anchored on analytics/1-command/typed-end-to-end), 3-step Quick Start with exact claude_desktop_config.json + Cursor + Windsurf snippets, "Compatible with" row, full 79-tool table grouped by 19 categories (each row: tool | what it does | realistic example prompt), Analytics spotlight section with sample return shapes and a sample "Show me my MRR and which plan is growing fastest" conversation, 8 curated example prompts, Safety section (sk_test_ vs sk_live_ detection, read-only vs destructive tool categorization), Architecture section linking to DECISIONS.md, Development section linking to CONTRIBUTING.md, Contributing paragraph, MIT license, Acknowledgements (Stripe SDK, MCP SDK, zod).
+   197→- Verified: all 19 docs/tools/*.md files exist, 79 tool sections across them, 79 tool rows in README, code fences balanced in README/CONTRIBUTING/all 19 docs, both YAML workflows parse cleanly with PyYAML, no source .ts files or package.json modified (only docs/CI/LICENSE written).
+   198→
+   199→Stage Summary:
+   200→- Files created (25 total): README.md, CONTRIBUTING.md, CHANGELOG.md, LICENSE, .github/workflows/ci.yml, .github/workflows/release.yml, and 19 × docs/tools/<category>.md (analytics, balance, billing-portal, checkout, coupons, customers, disputes, invoices, meters, payment-intents, payment-links, payouts, prices, products, promotion-codes, refunds, subscriptions, tax, webhooks).
+   201→- No source code, package.json, or Next.js landing page touched.
+   202→- Tool counts verified against src/tools: 6 customers + 5 products + 4 prices + 8 subscriptions + 6 invoices + 5 payment-intents + 3 refunds + 4 disputes + 5 webhooks + 4 coupons + 3 promotion-codes + 4 payment-links + 4 checkout + 1 billing-portal + 2 balance + 4 payouts + 3 tax + 3 meters + 5 analytics = 79. README table rows match. docs/tools section count matches.
+   203→- Accuracy: every parameter table, every Stripe docs URL, every tool description, and every return-shape example was cross-checked against the actual .ts source file rather than the spec — including the promotion-code coupon-wrapping quirk, the subscriptions.pause default-void behavior, the search-subscriptions "first page only" note, the meter formula enum (sum/count/last only, not the spec's max/min/id/email which Stripe doesn't support), and the failed-payments recovery-suggestion mapping.
+   204→- Ready for: npm publish on v1.0.0 tag, GitHub repo creation with stars badge URL pointing at stripe-mcp/stripe-mcp.
+   205→
+   206→---
+   207→Task ID: FINAL
+   208→Agent: orchestrator (Z.ai Code)
+   209→Task: Finalize stripe-mcp package + landing page; run all quality gates; verify via agent-browser.
+   210→
+   211→Work Log:
+   212→- Built stripe-mcp foundation (types, utils: currency/date/pagination/format-stripe-error/object, config, server, index, pre-wired barrel).
+   213→- Launched 6 parallel subagents: 5 tool-category agents (79 tools across 19 categories) + 1 landing-page agent.
+   214→- Fixed 2 foundation type issues: `Stripe.LatestApiVersion` (not exported) → omit apiVersion (use SDK default, DECISIONS 008); `Stripe.Error` → `Stripe.errors.StripeError`.
+   215→- Fixed 7 unused-import lint warnings across tool files.
+   216→- Migrated ESLint 10 (incompatible) → ESLint 9 flat config + typescript-eslint 8.
+   217→- Wrote 5 test files (36 tests). Resolved a vitest vi.fn mock-throw detection quirk by using a swappable plain-function holder for the error-path test (DECISIONS 009). Pinned vitest@^3.
+   218→- Fixed double-shebang in dist (removed source shebang; tsup banner handles it).
+   219→- Wrote 25 docs/CI files via subagent: README (viral, 79-tool table), CONTRIBUTING, CHANGELOG, LICENSE, 19 docs/tools/*.md, 2 GitHub workflows.
+   220→- Verified landing page via agent-browser: title correct, no console errors, all 12 sections render, search filter works, footer sticky-on-long-content, mobile responsive (nav collapses).
+   221→- VLM-verified visual design: dark theme, violet+emerald accents (no blue/indigo), hero/quickstart/tools-table/analytics all render correctly on scroll.
+   222→
+   223→Stage Summary:
+   224→- stripe-mcp package: ALL 5 QUALITY GATES PASS.
+   225→  1. typecheck → 0 errors
+   226→  2. lint → 0 warnings
+   227→  3. build → dist/index.js (217KB)
+   228→  4. test → 36/36 pass
+   229→  5. node dist/index.js → "✓ Test mode" + "stripe-mcp running on stdio"
+   230→- 79 tools across 19 categories (customers, products, prices, subscriptions, invoices, payment-intents, refunds, disputes, webhooks, coupons, promotion-codes, payment-links, checkout, billing-portal, balance, payouts, tax, meters, analytics).
+   231→- 5 analytics tools (crown jewel): get_mrr, get_churn_rate, get_revenue_summary, get_top_customers, get_failed_payments_report — all compute client-side via paginateAll.
+   232→- Next.js landing page at / : lint clean, renders, interactive, responsive, visually polished.
+   233→- Next steps for cron-driven review: enhance landing page micro-interactions, add an interactive "try a prompt" demo, expand test coverage to more tool categories, add a Dockerfile, add Cursor/Windsurf config docs.
+   234→
+   235→---
+   236→Task ID: 2-rev
+   237→Agent: full-stack-developer (landing page revision)
+   238→Task: Polish hero + tools table; add Playground, How-it-works, FAQ, Roadmap sections.
+   239→
+   240→Work Log:
+   241→- Read full project context (worklog history, page.tsx 1571 lines, stripe-mcp-tools.ts 587 lines, use-copy-to-clipboard hook, globals.css smcp-* helpers, layout.tsx, accordion.tsx, separator.tsx, textarea.tsx, dev.log).
+   242→- Verified dev server running (curl → 200) before any edits.
+   243→- Added new imports to page.tsx: Cable, Play, Loader2, ChevronDown, CircleDot, Circle from lucide-react; Textarea, Separator, and the Accordion family from shadcn/ui.
+   244→- Hero polish (QA #1, #2, #3):
+   245→  - Compacted HeroTerminal card (py-3→py-2.5 title bar, p-5→p-4 conversation, gap-3, smaller avatar circles h-7→h-6, text-[13px], space-y-3).
+   246→  - Increased MRR bar height h-2→h-3 and brightened track bg-white/5→bg-white/10 so bars are clearly visible.
+   247→  - Replaced muted outline badges with filled-pill HeroBadge components, each with a small colored dot (emerald/violet/amber/emerald) and tinted bg/text per badge type.
+   248→  - Rewrote "View on GitHub" button as a bright violet outline button (border-violet-400/60, bg-violet-500/10, text-violet-100) so it's as prominent as Quickstart. Applied the same treatment to the final-CTA secondary button.
+   249→- Nav polish: replaced links array — dropped Safety, added How it works, Playground, FAQ, Roadmap. Used lg:flex (not md) since 7 items need more horizontal room; tightened px-2.5. Removed unused Safety nav anchor.
+   250→- New HowItWorks section (#how-it-works): 4-step horizontal flow on lg with arrow connectors (rotated 90° on mobile for vertical stacking). Each step a card with violet icon, mono number, title, one-line desc. Emerald safety caption below citing STRIPE_SECRET_KEY never leaves the machine.
+   251→- New Playground section (#playground): 2-col layout. LEFT: 6 clickable prompt chips in a sm:grid-cols-2 grid (line-clamp-3), a Textarea showing the selected prompt, gradient "Run with stripe-mcp" button with Loader2 spinner + "stripe-mcp is thinking…" loading state, and a "Powered by your local Stripe key" caption (with inline Lock svg). RIGHT: response card with header "stripe-mcp • assistant" + green ready dot, scrollable body, footer "Executed via {tool} • {ms}ms". 6 mock responses defined as a const map keyed by id 0-5, each tailored to its prompt: MRR (big number + 4-bar by-plan chart + violet callout + JsonView), Failed payments (5-row table with decline_code badges + recovery suggestions), Top customers (10-row ranked list with mini bars + payment counts), Cancel+refund (3-step timestamped log with checkmarks and refunded total), Coupon+link (checkmark log + clickable plink URL + JsonView), Churn (2.4% headline + 4 churned customers list + JsonView). Built a small highlightJson() helper that regex-tokenizes JSON into colored spans (keys violet, strings emerald, numbers amber). Used framer-motion for fade-in transitions, with useReducedMotion guard. Initialized loading=true so SSR renders the thinking state then fades into the response on hydration (no flash).
+   252→- Tools table polish (QA #4):
+   253→  - Restructured: moved search + chips + counter INSIDE the table card, all wrapped in a sticky top-16 z-20 backdrop-blur-xl bg-[#0b0b18]/95 container. The table itself stays in its own max-h-[36rem] overflow-auto container with sticky thead top-0 z-10.
+   254→  - Counter "Showing X of 79" + Clear filter button moved into the sticky controls (right below chips row).
+   255→  - Reworked CategoryChip: active state now uses solid, more saturated fills (replacing /10 with /30 opacity, /25 border with /60) with text-white + shadow-sm; the "All" chip active state is solid zinc-200 with zinc-900 text for clear contrast.
+   256→  - ToolRow example prompt now uses line-clamp-2 max-w-sm so long prompts wrap to 2 lines and never overflow.
+   257→  - Hover row highlight (hover:bg-white/[0.03]) already present, verified preserved.
+   258→- New FAQ section (#faq): full-width card with shadcn Accordion (type="single" collapsible). 8 Q&As as FAQ_ITEMS const, each rendered with a numbered violet dot, hover highlight, and data-[state=open] violet border accent. Answers use MonoPill for code/IDs and span font-semibold for emphasis where appropriate.
+   259→- New Roadmap section (#roadmap): 3-col lg grid (1-col mobile). Each column = card with header (icon + label + version pill), Separator, bullet list. Shipped = Check emerald (8 items), Next = CircleDot violet (7 items), Later = Circle zinc (6 items) — matching the spec lists exactly.
+   260→- Updated Home page section order to: Hero → StatsStrip → CompatibleWith → HowItWorks (NEW) → Quickstart → Playground (NEW) → ToolsTable → AnalyticsSpotlight → ExamplePrompts → Safety → Features → FAQ (NEW) → Roadmap (NEW) → FinalCta → Footer.
+   261→- Footer Resources column updated to link Playground, FAQ, Roadmap anchors.
+   262→- Styling rules followed: dark #070710 base; violet (#7c3aed/#8b5cf6) + emerald (#10b981) accents; NO indigo/blue (sky is avoided — only used as a category chip color inherited from the existing categoryColors map which is fine since that's data-driven for stripe-mcp tool categories, not the new hero/nav design). Cards use rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur with hover:border-violet-400/40. Gradient text via GradientText helper. MonoPill for tool names/IDs. framer-motion whileInView + useReducedMotion via existing Reveal pattern. Existing shadcn components (Button, Card primitives via divs, Input, Badge, Accordion, Separator, Textarea, Tooltip) reused — no new packages installed.
+   263→- Accessibility: semantic <section>, <nav>, <main>, <header>, <footer>, <table>, <ul>/<ol>, <li>; aria-label on primary nav, aria-pressed on prompt chips and category chips, aria-label on copy buttons; keyboard-focusable <button> elements throughout.
+   264→- Responsive: Hero grid lg:grid-cols-2; HowItWorks uses lg:grid-cols-[1fr_auto_1fr_auto_1fr_auto_1fr] with arrow rotation on mobile; Playground stacks lg:grid-cols-2; ToolsTable min-w-[640px] with horizontal scroll on small screens; FAQ single column full-width; Roadmap 1-col mobile → 3-col lg.
+   265→- Sticky footer preserved: outer wrapper div min-h-screen flex flex-col, footer mt-auto.
+   266→- Quality gates: `bun run lint` → 0 errors, 0 warnings. `curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/` → 200. dev.log shows clean compiles ("✓ Compiled in 424ms", "✓ Compiled in 133ms") with no runtime errors. Verified all 11 section IDs (top, how-it-works, quickstart, playground, tools, analytics, prompts, safety, features, faq, roadmap) render in the SSR HTML.
+   267→- Did NOT touch /home/z/my-project/stripe-mcp/ (package source) — only the Next.js app.
+   268→
+   269→Stage Summary:
+   270→- Files modified: 1 (src/app/page.tsx — rewritten 1571 → 2522 lines, +951 lines).
+   271→- QA fixes applied: Hero terminal compacted (smaller padding, smaller avatars, h-3 brighter bars); hero badges now filled pills with colored dots; GitHub button bright violet outline as prominent as Quickstart; tools table controls sticky (top-16, backdrop-blur, dark bg) inside the card with counter directly below chips; category chips now have solid saturated active states with clear contrast; example prompts use line-clamp-2 to prevent overflow; hover row highlight preserved.
+   272→- New sections added: HowItWorks (#how-it-works), Playground (#playground) with 6 interactive mock responses + JsonView syntax highlighter, FAQ (#faq) with 8 Accordion Q&As, Roadmap (#roadmap) with 3 columns (Shipped/Next/Later).
+   273→- Nav updated: 7 items (How it works, Playground, Tools, Analytics, FAQ, Roadmap, GitHub) shown on lg+; npm command pill hidden on small screens; Star on GitHub CTA preserved.
+   274→- Final section order matches spec exactly.
+   275→- Lint: clean. Dev server: 200 OK, no runtime errors. All section IDs verified in SSR HTML.
+   276→- No issues or blockers.
+   277→
+   278→---
+   279→Task ID: REVIEW-1
+   280→Agent: orchestrator (Z.ai Code) — cron webDevReview round 1
+   281→Task: QA via agent-browser, fix bugs, improve styling, add features.
+   282→
+   283→Work Log:
+   284→- Read full worklog to assess project state (package complete, landing page complete, all gates previously passing).
+   285→- QA via agent-browser: page loads HTTP 200, zero console errors, zero page errors, 11 sections present, 25 buttons / 29 links / 1 h1 / 7 h2, no broken images, footer exists, body 8095px tall.
+   286→- VLM audit of hero: identified low-contrast badges, "View on GitHub" button blending in, faint MRR bars, hero imbalance.
+   287→- VLM audit of tools table: identified need for sticky search/chips, better chip contrast, line-clamp overflow, hover rows.
+   288→- Delegated landing-page revision to full-stack-developer subagent (Task 2-rev): polished hero + tools table; added 4 NEW sections (Playground, How-it-works, FAQ, Roadmap). Subagent reported lint clean, all sections rendering.
+   289→- Re-QA via agent-browser after revision: found a BUG — the Playground "Run with stripe-mcp" button set loading=true and bumped runToken, but the loading-clear effect only depended on [activeId], so clicking Run left the demo stuck on "stripe-mcp is thinking…" forever. Fixed by adding runToken to the effect dep array.
+   290→- Improved "View on GitHub" button contrast: changed from faint violet (border-violet-400/60 bg-violet-500/10) to a brighter outline (border-zinc-200/25 bg-white/[0.06] text-zinc-50 shadow-sm) so it reads as a peer to the Quickstart CTA.
+   291→- Added NEW package feature: stripe-mcp CLI flags. Created src/cli.ts with --help/-h, --version/-v, --list-tools (JSON of all 79 tools to stdout), --list-categories (JSON category breakdown). Wired into src/index.ts so flags are handled before the server starts. Human-readable output (help/version) goes to stderr; machine-readable (list-tools/list-categories) goes to stdout — keeps stdio transport clean.
+   292→- Added 8 CLI tests (tests/tools/cli.test.ts) covering: no-args passthrough, --help/-h, --version/-v, --list-tools (validates 79 tools + naming convention + MRR tool present), --list-categories (validates 19 categories incl. billing-portal/promotion-codes/payment-intents), unknown-flag warning.
+   293→- Fixed a category-extraction bug in --list-categories: original lastIndexOf('_') approach broke on multi-word actions (stripe_analytics_get_mrr → "analytics_get"). Replaced with a known-categories longest-prefix match.
+   294→- Verified all CLI flags at runtime: --version → "stripe-mcp 1.0.0"; --list-tools → 79 tools as JSON; --list-categories → correct breakdown (analytics:5, balance:2, billing-portal:1, customers:6, ...); --help → full usage text; no-args → server starts ("✓ Test mode" + "stripe-mcp running on stdio").
+   295→- VLM re-verified all 5 screenshots (hero, playground, how-it-works, faq, roadmap): verdict "Production-quality and visually polished, with consistent dark theme and clear structure."
+   296→
+   297→Stage Summary:
+   298→- stripe-mcp package: ALL 5 QUALITY GATES PASS.
+   299→  1. typecheck → 0 errors
+   300→  2. lint → 0 warnings
+   301→  3. build → dist/index.js
+   302→  4. test → 44/44 pass (was 36, +8 CLI tests)
+   303→  5. node dist/index.js → "✓ Test mode" + "stripe-mcp running on stdio"
+   304→- New package feature: 4 CLI flags (--help, --version, --list-tools, --list-categories) for IDE integration / debugging / docs generation.
+   305→- Landing page: 4 NEW sections (Playground interactive demo, How-it-works architecture diagram, FAQ accordion with 8 Q&As, Roadmap with 3 phases). Hero polished (brighter badges, prominent GitHub button, visible MRR chart). Tools table polished (sticky search/chips, better contrast, line-clamp, hover rows). Next.js lint clean. HTTP 200, zero runtime errors.
+   306→- Bug fixed: Playground Run button no longer gets stuck on "thinking" state.
+   307→- Unresolved / next-phase recommendations:
+   308→  - Playground could show a "copy response" button and a prompt-history.
+   309→  - FAQ accordion chevrons were subtle in VLM screenshot — consider brighter expand indicator.
+   310→  - How-it-works steps could use subtle gradient connectors for more visual differentiation.
+   311→  - Add a Dockerfile for the package (on roadmap).
+   312→  - Expand test coverage to more tool categories (currently 5 tool test files + 1 util + 1 CLI).
+   313→  - Add Cursor + Windsurf exact config JSON to the README (partially present).
+   314→

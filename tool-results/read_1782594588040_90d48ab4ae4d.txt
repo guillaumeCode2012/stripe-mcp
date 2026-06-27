@@ -1,0 +1,602 @@
+   770→              <div className="mt-4 flex items-center gap-2 rounded-lg border border-white/10 bg-black/40 px-3 py-2.5">
+   771→                <span className="select-none font-mono text-xs text-zinc-500">$</span>
+   772→                <code className="flex-1 overflow-x-auto whitespace-nowrap font-mono text-xs text-emerald-300 smcp-scrollbar">
+   773→                  {s.code}
+   774→                </code>
+   775→                <CopyButton value={s.code} label="" className="h-6 px-1.5" />
+   776→              </div>
+   777→            </div>
+   778→          </Reveal>
+   779→        ))}
+   780→
+   781→        {/* Step 3 — wider JSON config card */}
+   782→        <Reveal delay={0.16} className="lg:col-span-2">
+   783→          <div className="group relative rounded-2xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur transition-all hover:border-violet-400/40 hover:bg-white/[0.05]">
+   784→            <div className="flex items-center justify-between">
+   785→              <div className="flex items-center gap-3">
+   786→                <span className="font-mono text-sm text-violet-300">03</span>
+   787→                <h3 className="text-lg font-semibold text-white">
+   788→                  Add it to{" "}
+   789→                  <code className="rounded-md bg-white/5 px-1.5 py-0.5 font-mono text-sm text-zinc-200">
+   790→                    claude_desktop_config.json
+   791→                  </code>
+   792→                </h3>
+   793→              </div>
+   794→              <CopyButton value={CLAUDE_CONFIG_JSON} label="Copy JSON" />
+   795→            </div>
+   796→            <p className="mt-1 text-sm text-zinc-400">
+   797→              The same snippet works for Cursor and Windsurf — just drop it in their MCP config.
+   798→            </p>
+   799→            <pre className="mt-4 overflow-x-auto rounded-lg border border-white/10 bg-black/50 p-4 font-mono text-xs leading-relaxed text-zinc-200 smcp-scrollbar">
+   800→{`{
+   801→  "mcpServers": {
+   802→    "stripe": {
+   803→      "command": "stripe-mcp",
+   804→      "env": { "STRIPE_SECRET_KEY": "sk_test_..." }
+   805→    }
+   806→  }
+   807→}`}
+   808→            </pre>
+   809→          </div>
+   810→        </Reveal>
+   811→      </div>
+   812→    </Section>
+   813→  );
+   814→}
+   815→
+   816→/* ────────────────────────────────────────────────────────────────────────────
+   817→ * 7. Interactive Playground (NEW)
+   818→ * ──────────────────────────────────────────────────────────────────────── */
+   819→
+   820→/** Tiny JSON syntax highlighter — keys violet, strings emerald, numbers amber. */
+   821→function highlightJson(json: string): React.ReactNode[] {
+   822→  const parts: React.ReactNode[] = [];
+   823→  const regex = /("(?:\\.|[^"\\])*")(\s*:)?|(-?\d+(?:\.\d+)?)/g;
+   824→  let last = 0;
+   825→  let m: RegExpExecArray | null;
+   826→  let k = 0;
+   827→  while ((m = regex.exec(json)) !== null) {
+   828→    if (m.index > last) {
+   829→      parts.push(<span key={k++}>{json.slice(last, m.index)}</span>);
+   830→    }
+   831→    if (m[1]) {
+   832→      if (m[2]) {
+   833→        parts.push(<span key={k++} className="text-violet-300">{m[1]}</span>);
+   834→        parts.push(<span key={k++} className="text-zinc-500">{m[2]}</span>);
+   835→      } else {
+   836→        parts.push(<span key={k++} className="text-emerald-300">{m[1]}</span>);
+   837→      }
+   838→    } else if (m[3]) {
+   839→      parts.push(<span key={k++} className="text-amber-300">{m[3]}</span>);
+   840→    }
+   841→    last = regex.lastIndex;
+   842→  }
+   843→  if (last < json.length) {
+   844→    parts.push(<span key={k++}>{json.slice(last)}</span>);
+   845→  }
+   846→  return parts;
+   847→}
+   848→
+   849→function JsonView({ data, className }: { data: unknown; className?: string }) {
+   850→  const json = JSON.stringify(data, null, 2);
+   851→  return (
+   852→    <pre
+   853→      className={cn(
+   854→        "overflow-x-auto rounded-lg border border-white/10 bg-black/50 p-3 font-mono text-[11px] leading-relaxed smcp-scrollbar",
+   855→        className
+   856→      )}
+   857→    >
+   858→      <code>{highlightJson(json)}</code>
+   859→    </pre>
+   860→  );
+   861→}
+   862→
+   863→type PlaygroundPrompt = {
+   864→  id: number;
+   865→  label: string;
+   866→  prompt: string;
+   867→  tool: string;
+   868→  ms: number;
+   869→  render: () => React.ReactNode;
+   870→};
+   871→
+   872→const PLAYGROUND_PROMPTS: PlaygroundPrompt[] = [
+   873→  {
+   874→    id: 0,
+   875→    label: "Show me my MRR and which plan is growing fastest",
+   876→    prompt: "Show me my MRR and which plan is growing fastest",
+   877→    tool: "stripe_analytics_get_mrr",
+   878→    ms: 412,
+   879→    render: () => (
+   880→      <div className="space-y-3">
+   881→        <div className="flex items-baseline gap-2">
+   882→          <span className="font-mono text-2xl font-semibold text-white">$48,250</span>
+   883→          <span className="text-xs text-zinc-400">/mo</span>
+   884→          <span className="ml-auto inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-300">
+   885→            <TrendingUp className="h-3 w-3" /> +12.4% MoM
+   886→          </span>
+   887→        </div>
+   888→        <div className="space-y-1.5 rounded-lg border border-white/5 bg-black/30 p-3">
+   889→          <div className="text-[10px] uppercase tracking-wide text-zinc-500">mrr_by_plan</div>
+   890→          {[
+   891→            { plan: "Enterprise", mrr: "$22,000", w: "w-[92%]" },
+   892→            { plan: "Pro", mrr: "$18,400", w: "w-[76%]" },
+   893→            { plan: "Starter", mrr: "$5,850", w: "w-[34%]" },
+   894→            { plan: "Free → paid", mrr: "$2,000", w: "w-[12%]" },
+   895→          ].map((r) => (
+   896→            <div key={r.plan} className="flex items-center gap-2">
+   897→              <span className="w-20 shrink-0 text-[11px] text-zinc-400">{r.plan}</span>
+   898→              <div className="h-3 flex-1 overflow-hidden rounded-full bg-white/10">
+   899→                <div className={cn("h-full rounded-full bg-gradient-to-r from-violet-500 to-emerald-500", r.w)} />
+   900→              </div>
+   901→              <span className="w-14 shrink-0 text-right font-mono text-[11px] text-zinc-300">{r.mrr}</span>
+   902→            </div>
+   903→          ))}
+   904→        </div>
+   905→        <div className="rounded-lg border border-violet-500/30 bg-violet-500/10 p-3 text-[12px] text-zinc-200">
+   906→          <Sparkles className="mr-1.5 inline h-3.5 w-3.5 text-violet-300" />
+   907→          <span className="font-semibold">Fastest-growing: Pro</span> — +18% MoM. Top contributor{" "}
+   908→          <MonoPill>cus_AcmeCorp</MonoPill> ($5,000/mo).
+   909→        </div>
+   910→        <JsonView
+   911→          data={{
+   912→            total_mrr: "$48,250/mo",
+   913→            currency: "usd",
+   914→            active_subscriptions: 167,
+   915→            mrr_by_plan: {
+   916→              Enterprise: "$22,000",
+   917→              Pro: "$18,400",
+   918→              Starter: "$5,850",
+   919→              "Free → paid": "$2,000",
+   920→            },
+   921→            top_customers_by_mrr: [
+   922→              { customer: "cus_AcmeCorp", plan: "Enterprise", mrr: "$5,000" },
+   923→              { customer: "cus_Globex", plan: "Pro", mrr: "$980" },
+   924→              { customer: "cus_Initech", plan: "Pro", mrr: "$490" },
+   925→            ],
+   926→            fastest_growing_plan: "Pro (+18% MoM)",
+   927→          }}
+   928→        />
+   929→      </div>
+   930→    ),
+   931→  },
+   932→  {
+   933→    id: 1,
+   934→    label: "List all failed payments from the last 30 days with failure reasons",
+   935→    prompt: "List all failed payments from the last 30 days with failure reasons",
+   936→    tool: "stripe_analytics_get_failed_payments_report",
+   937→    ms: 387,
+   938→    render: () => {
+   939→      const rows = [
+   940→        { id: "ch_1Pq8", email: "alice@acme.io", amount: "$49.00", code: "card_declined", recovery: "Retry in 3 days; ask customer to update card." },
+   941→        { id: "ch_1Pq7", email: "bob@globex.com", amount: "$129.00", code: "insufficient_funds", recovery: "Retry on the 1st of next month." },
+   942→        { id: "ch_1Pq5", email: "carol@initech.io", amount: "$19.00", code: "expired_card", recovery: "Email customer to update expiry." },
+   943→        { id: "ch_1Pq3", email: "dan@startup.co", amount: "$490.00", code: "card_declined", recovery: "Do Not Honor — contact customer's bank." },
+   944→        { id: "ch_1Pq1", email: "eve@oldco.dev", amount: "$25.00", code: "incorrect_cvc", recovery: "Ask customer to re-enter CVC." },
+   945→      ];
+   946→      return (
+   947→        <div className="space-y-3">
+   948→          <div className="flex items-baseline gap-2">
+   949→            <span className="font-mono text-2xl font-semibold text-white">14</span>
+   950→            <span className="text-xs text-zinc-400">failed charges · last 30 days</span>
+   951→            <span className="ml-auto inline-flex items-center gap-1 rounded-full border border-rose-500/30 bg-rose-500/10 px-2 py-0.5 text-[10px] font-medium text-rose-300">
+   952→              <AlertTriangle className="h-3 w-3" /> -$1,281.00
+   953→            </span>
+   954→          </div>
+   955→          <div className="overflow-x-auto rounded-lg border border-white/10 bg-black/40 smcp-scrollbar">
+   956→            <table className="w-full min-w-[520px] text-left text-[11px]">
+   957→              <thead className="border-b border-white/10 bg-white/[0.02] text-[10px] uppercase tracking-wide text-zinc-500">
+   958→                <tr>
+   959→                  <th className="px-2.5 py-2 font-medium">Charge</th>
+   960→                  <th className="px-2.5 py-2 font-medium">Customer</th>
+   961→                  <th className="px-2.5 py-2 font-medium">Amount</th>
+   962→                  <th className="px-2.5 py-2 font-medium">Decline code</th>
+   963→                  <th className="px-2.5 py-2 font-medium">Recovery</th>
+   964→                </tr>
+   965→              </thead>
+   966→              <tbody>
+   967→                {rows.map((r) => (
+   968→                  <tr key={r.id} className="border-b border-white/5 last:border-b-0">
+   969→                    <td className="px-2.5 py-2 font-mono text-violet-300">{r.id}</td>
+   970→                    <td className="px-2.5 py-2 text-zinc-300">{r.email}</td>
+   971→                    <td className="px-2.5 py-2 font-mono text-amber-300">{r.amount}</td>
+   972→                    <td className="px-2.5 py-2">
+   973→                      <span className="rounded-md border border-rose-500/30 bg-rose-500/10 px-1.5 py-0.5 font-mono text-[10px] text-rose-300">
+   974→                        {r.code}
+   975→                      </span>
+   976→                    </td>
+   977→                    <td className="px-2.5 py-2 text-zinc-400">{r.recovery}</td>
+   978→                  </tr>
+   979→                ))}
+   980→              </tbody>
+   981→            </table>
+   982→          </div>
+   983→          <p className="text-[11px] text-zinc-500">
+   984→            Most common: <span className="font-mono text-rose-300">card_declined</span> (7 of 14).
+   985→            Consider Smart Retries — re-attempting on day 3 recovers ~31%.
+   986→          </p>
+   987→        </div>
+   988→      );
+   989→    },
+   990→  },
+   991→  {
+   992→    id: 2,
+   993→    label: "Who are my top 10 customers by lifetime value?",
+   994→    prompt: "Who are my top 10 customers by lifetime value?",
+   995→    tool: "stripe_analytics_get_top_customers",
+   996→    ms: 524,
+   997→    render: () => {
+   998→      const rows = [
+   999→        { rank: 1, name: "Acme Corp", email: "billing@acme.io", ltv: 48200, payments: 124 },
+  1000→        { rank: 2, name: "Globex", email: "ap@globex.com", ltv: 31900, payments: 87 },
+  1001→        { rank: 3, name: "Initech", email: "ops@initech.io", ltv: 22400, payments: 62 },
+  1002→        { rank: 4, name: "Umbrella Inc", email: "pay@umbrella.dev", ltv: 18950, payments: 51 },
+  1003→        { rank: 5, name: "Hooli", email: "fin@hooli.tech", ltv: 14200, payments: 44 },
+  1004→        { rank: 6, name: "Stark Industries", email: "pepper@stark.io", ltv: 11800, payments: 38 },
+  1005→        { rank: 7, name: "Wayne Enterprises", email: "lucius@wayne.co", ltv: 9450, payments: 29 },
+  1006→        { rank: 8, name: "Cyberdyne", email: "mile@cyberdyne.ai", ltv: 7600, payments: 24 },
+  1007→        { rank: 9, name: "Soylent Corp", email: "ops@soylent.co", ltv: 5800, payments: 19 },
+  1008→        { rank: 10, name: "Massive Dynamic", email: "bell@massdyn.io", ltv: 4200, payments: 14 },
+  1009→      ];
+  1010→      const max = rows[0].ltv;
+  1011→      return (
+  1012→        <div className="space-y-2">
+  1013→          <div className="flex items-baseline gap-2">
+  1014→            <span className="font-mono text-2xl font-semibold text-white">10</span>
+  1015→            <span className="text-xs text-zinc-400">top customers by LTV · total $175,500</span>
+  1016→          </div>
+  1017→          <ul className="space-y-1.5">
+  1018→            {rows.map((r) => (
+  1019→              <li key={r.rank} className="flex items-center gap-2.5 rounded-lg border border-white/5 bg-black/30 px-2.5 py-1.5">
+  1020→                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-emerald-500 text-[10px] font-bold text-white">
+  1021→                  {r.rank}
+  1022→                </span>
+  1023→                <div className="min-w-0 flex-1">
+  1024→                  <div className="flex items-center gap-2">
+  1025→                    <span className="truncate text-[12px] font-medium text-zinc-100">{r.name}</span>
+  1026→                    <span className="hidden truncate text-[10px] text-zinc-500 sm:inline">{r.email}</span>
+  1027→                  </div>
+  1028→                  <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-white/5">
+  1029→                    <div
+  1030→                      className="h-full rounded-full bg-gradient-to-r from-violet-500 to-emerald-500"
+  1031→                      style={{ width: `${(r.ltv / max) * 100}%` }}
+  1032→                    />
+  1033→                  </div>
+  1034→                </div>
+  1035→                <div className="shrink-0 text-right">
+  1036→                  <div className="font-mono text-[11px] font-semibold text-emerald-300">${r.ltv.toLocaleString()}</div>
+  1037→                  <div className="text-[9px] text-zinc-500">{r.payments} payments</div>
+  1038→                </div>
+  1039→              </li>
+  1040→            ))}
+  1041→          </ul>
+  1042→        </div>
+  1043→      );
+  1044→    },
+  1045→  },
+  1046→  {
+  1047→    id: 3,
+  1048→    label: "Cancel the subscription for john@example.com and refund his last invoice",
+  1049→    prompt: "Cancel the subscription for john@example.com and refund his last invoice",
+  1050→    tool: "stripe_subscriptions_cancel + stripe_refunds_create",
+  1051→    ms: 698,
+  1052→    render: () => (
+  1053→      <div className="space-y-2.5 text-[12px]">
+  1054→        <div className="flex items-baseline gap-2">
+  1055→          <span className="font-mono text-lg font-semibold text-white">✓ Done</span>
+  1056→          <span className="text-zinc-400">2 tools · 698ms total</span>
+  1057→        </div>
+  1058→        <ol className="space-y-2">
+  1059→          <li className="flex items-start gap-2 rounded-lg border border-white/5 bg-black/30 p-2.5">
+  1060→            <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-400" />
+  1061→            <div className="min-w-0">
+  1062→              <p className="text-zinc-200">
+  1063→                Found subscription <MonoPill>sub_1AbC23</MonoPill> for{" "}
+  1064→                <span className="font-mono text-zinc-100">john@example.com</span> — Pro plan, $49/mo.
+  1065→              </p>
+  1066→              <p className="mt-0.5 text-[10px] text-zinc-500">2025-01-15T14:31:48Z · stripe_customers_search</p>
+  1067→            </div>
+  1068→          </li>
+  1069→          <li className="flex items-start gap-2 rounded-lg border border-white/5 bg-black/30 p-2.5">
+  1070→            <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-400" />
+  1071→            <div className="min-w-0">
+  1072→              <p className="text-zinc-200">
+  1073→                Cancelled <MonoPill>sub_1AbC23</MonoPill> at period end.
+  1074→              </p>
+  1075→              <p className="mt-0.5 text-[10px] text-zinc-500">2025-01-15T14:31:54Z · stripe_subscriptions_cancel</p>
+  1076→            </div>
+  1077→          </li>
+  1078→          <li className="flex items-start gap-2 rounded-lg border border-emerald-500/25 bg-emerald-500/[0.06] p-2.5">
+  1079→            <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-400" />
+  1080→            <div className="min-w-0">
+  1081→              <p className="text-zinc-200">
+  1082→                Refunded invoice <MonoPill>in_1Xy99</MonoPill> ($49.00) →{" "}
+  1083→                <MonoPill className="border-emerald-500/30 bg-emerald-500/10 text-emerald-200">re_3Qk77</MonoPill>
+  1084→              </p>
+  1085→              <p className="mt-0.5 text-[10px] text-zinc-500">2025-01-15T14:32:02Z · stripe_refunds_create</p>
+  1086→            </div>
+  1087→          </li>
+  1088→        </ol>
+  1089→        <div className="flex items-center justify-between rounded-lg border border-white/10 bg-black/40 p-2.5">
+  1090→          <span className="text-zinc-400">Total refunded</span>
+  1091→          <span className="font-mono text-base font-semibold text-emerald-300">$49.00</span>
+  1092→        </div>
+  1093→      </div>
+  1094→    ),
+  1095→  },
+  1096→  {
+  1097→    id: 4,
+  1098→    label: "Create a 3-month 50% off coupon and a payment link for the Pro plan",
+  1099→    prompt: "Create a 3-month 50% off coupon and a payment link for the Pro plan",
+  1100→    tool: "stripe_coupons_create + stripe_payment_links_create",
+  1101→    ms: 542,
+  1102→    render: () => (
+  1103→      <div className="space-y-2.5 text-[12px]">
+  1104→        <div className="flex items-baseline gap-2">
+  1105→          <span className="font-mono text-lg font-semibold text-white">✓ Done</span>
+  1106→          <span className="text-zinc-400">2 tools · 542ms total</span>
+  1107→        </div>
+  1108→        <ol className="space-y-2">
+  1109→          <li className="flex items-start gap-2 rounded-lg border border-white/5 bg-black/30 p-2.5">
+  1110→            <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-400" />
+  1111→            <div className="min-w-0">
+  1112→              <p className="text-zinc-200">
+  1113→                Created coupon <MonoPill className="border-fuchsia-500/30 bg-fuchsia-500/10 text-fuchsia-200">50OFF3MO</MonoPill>{" "}
+  1114→                — 50% off, 3 months duration (repeating).
+  1115→              </p>
+  1116→              <p className="mt-0.5 text-[10px] text-zinc-500">stripe_coupons_create · id coupon_50OFF3MO</p>
+  1117→            </div>
+  1118→          </li>
+  1119→          <li className="flex items-start gap-2 rounded-lg border border-emerald-500/25 bg-emerald-500/[0.06] p-2.5">
+  1120→            <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-400" />
+  1121→            <div className="min-w-0">
+  1122→              <p className="text-zinc-200">
+  1123→                Created payment link <MonoPill className="border-teal-500/30 bg-teal-500/10 text-teal-200">plink_1Ab9</MonoPill>{" "}
+  1124→                for <span className="font-mono text-zinc-100">price_Pro_monthly</span>.
+  1125→              </p>
+  1126→              <a
+  1127→                href="#playground"
+  1128→                className="mt-1.5 inline-flex max-w-full items-center gap-1 truncate rounded-md border border-emerald-500/30 bg-black/40 px-2 py-1 font-mono text-[11px] text-emerald-300 hover:bg-black/60"
+  1129→              >
+  1130→                <Link2 className="h-3 w-3 shrink-0" />
+  1131→                <span className="truncate">https://buy.stripe.com/test_abc123</span>
+  1132→              </a>
+  1133→              <p className="mt-1 text-[10px] text-zinc-500">stripe_payment_links_create · active</p>
+  1134→            </div>
+  1135→          </li>
+  1136→        </ol>
+  1137→        <JsonView
+  1138→          data={{
+  1139→            coupon: { id: "50OFF3MO", percent_off: 50, duration: "repeating", duration_in_months: 3 },
+  1140→            payment_link: {
+  1141→              id: "plink_1Ab9",
+  1142→              url: "https://buy.stripe.com/test_abc123",
+  1143→              price: "price_Pro_monthly",
+  1144→              active: true,
+  1145→            },
+  1146→          }}
+  1147→        />
+  1148→      </div>
+  1149→    ),
+  1150→  },
+  1151→  {
+  1152→    id: 5,
+  1153→    label: "What's my churn rate over the last 90 days?",
+  1154→    prompt: "What's my churn rate over the last 90 days?",
+  1155→    tool: "stripe_analytics_get_churn_rate",
+  1156→    ms: 461,
+  1157→    render: () => {
+  1158→      const churned = [
+  1159→        { id: "cus_OldCo", email: "founder@oldco.io", ltv: "$1,240", reason: "cancellation_requested" },
+  1160→        { id: "cus_TestCo", email: "ops@testco.dev", ltv: "$840", reason: "cancellation_requested" },
+  1161→        { id: "cus_Nowgone", email: "ceo@nowgone.co", ltv: "$610", reason: "payment_failed" },
+  1162→        { id: "cus_Sunset", email: "billing@sunset.io", ltv: "$420", reason: "cancellation_requested" },
+  1163→      ];
+  1164→      return (
+  1165→        <div className="space-y-3">
+  1166→          <div className="flex items-baseline gap-2">
+  1167→            <span className="font-mono text-2xl font-semibold text-white">2.4%</span>
+  1168→            <span className="text-xs text-zinc-400">/90 days</span>
+  1169→            <span className="ml-auto inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-300">
+  1170→              <TrendingDown className="h-3 w-3" /> down from 3.1%
+  1171→            </span>
+  1172→          </div>
+  1173→          <p className="text-[12px] text-zinc-300">
+  1174→            <span className="font-semibold text-rose-300">4 of 167</span> active subscriptions at
+  1175→            period start were canceled in the last 90 days.
+  1176→          </p>
+  1177→          <div className="overflow-hidden rounded-lg border border-white/10 bg-black/40">
+  1178→            <div className="border-b border-white/5 bg-white/[0.02] px-2.5 py-1.5 text-[10px] uppercase tracking-wide text-zinc-500">
+  1179→              churned_customers
+  1180→            </div>
+  1181→            <ul className="divide-y divide-white/5">
+  1182→              {churned.map((c) => (
+  1183→                <li key={c.id} className="flex items-center gap-2 px-2.5 py-1.5 text-[11px]">
+  1184→                  <UserX className="h-3.5 w-3.5 shrink-0 text-rose-400" />
+  1185→                  <span className="font-mono text-violet-300">{c.id}</span>
+  1186→                  <span className="truncate text-zinc-400">{c.email}</span>
+  1187→                  <span className="ml-auto shrink-0 font-mono text-amber-300">{c.ltv}</span>
+  1188→                </li>
+  1189→              ))}
+  1190→            </ul>
+  1191→          </div>
+  1192→          <JsonView
+  1193→            data={{
+  1194→              churn_rate_90d: "2.4%",
+  1195→              window: { start: "2024-10-15", end: "2025-01-13" },
+  1196→              active_at_period_start: 167,
+  1197→              churned_in_period: 4,
+  1198→              revenue_lost: "$3,110.00",
+  1199→              most_common_reason: "cancellation_requested",
+  1200→            }}
+  1201→          />
+  1202→        </div>
+  1203→      );
+  1204→    },
+  1205→  },
+  1206→];
+  1207→
+  1208→function Playground() {
+  1209→  const [activeId, setActiveId] = React.useState<number>(0);
+  1210→  // Initialize to true so SSR + first paint shows the thinking state, then fades
+  1211→  // into the response — no flash of stale content on hydration.
+  1212→  const [loading, setLoading] = React.useState<boolean>(true);
+  1213→  const [runToken, setRunToken] = React.useState<number>(0); // bumps to retrigger response fade
+  1214→  const reduce = useReducedMotion();
+  1215→
+  1216→  const active = PLAYGROUND_PROMPTS.find((p) => p.id === activeId) ?? PLAYGROUND_PROMPTS[0];
+  1217→
+  1218→  const run = React.useCallback(() => {
+  1219→    if (loading) return;
+  1220→    setLoading(true);
+  1221→    setRunToken((t) => t + 1);
+  1222→  }, [loading]);
+  1223→
+  1224→  // When the prompt changes OR the user hits "Run", show the thinking state
+  1225→  // briefly, then reveal the response. Both `activeId` (chip click) and
+  1226→  // `runToken` (Run button click) are deps so either interaction retriggers
+  1227→  // the loading→response cycle. Without `runToken` in the dep array, hitting
+  1228→  // Run would set loading=true with nothing to clear it, leaving the demo
+  1229→  // stuck on "stripe-mcp is thinking…".
+  1230→  React.useEffect(() => {
+  1231→    setLoading(true);
+  1232→    const t = setTimeout(() => setLoading(false), 600);
+  1233→    return () => clearTimeout(t);
+  1234→  }, [activeId, runToken]);
+  1235→
+  1236→  return (
+  1237→    <Section id="playground">
+  1238→      <Reveal>
+  1239→        <Eyebrow>
+  1240→          <Play className="h-3.5 w-3.5 text-violet-300" /> Interactive
+  1241→        </Eyebrow>
+  1242→        <h2 className="text-3xl font-bold tracking-tight text-white md:text-5xl">
+  1243→          Try it. <GradientText>Right here.</GradientText>
+  1244→        </h2>
+  1245→        <p className="mt-4 max-w-2xl text-zinc-400">
+  1246→          Pick a prompt and watch stripe-mcp respond — no setup required.
+  1247→        </p>
+  1248→      </Reveal>
+  1249→
+  1250→      <div className="mt-12 grid gap-5 lg:grid-cols-2">
+  1251→        {/* LEFT — prompt selector + textarea */}
+  1252→        <Reveal>
+  1253→          <div className="flex h-full flex-col rounded-2xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur">
+  1254→            <div className="mb-3 flex items-center gap-2">
+  1255→              <span className="flex h-7 w-7 items-center justify-center rounded-md border border-violet-500/25 bg-violet-500/10 text-violet-300">
+  1256→                <Type className="h-3.5 w-3.5" />
+  1257→              </span>
+  1258→              <h3 className="text-sm font-semibold text-white">Pick a prompt</h3>
+  1259→              <span className="ml-auto text-[10px] text-zinc-500">click to load</span>
+  1260→            </div>
+  1261→
+  1262→            <div className="grid gap-2 sm:grid-cols-2">
+  1263→              {PLAYGROUND_PROMPTS.map((p) => {
+  1264→                const isActive = p.id === activeId;
+  1265→                return (
+  1266→                  <button
+  1267→                    key={p.id}
+  1268→                    type="button"
+  1269→                    onClick={() => setActiveId(p.id)}
+  1270→                    aria-pressed={isActive}
+  1271→                    className={cn(
+  1272→                      "group flex h-full min-h-[68px] items-start gap-2 rounded-xl border p-2.5 text-left text-[11px] leading-relaxed transition-all",
+  1273→                      isActive
+  1274→                        ? "border-violet-400/60 bg-violet-500/15 text-violet-100 shadow-sm shadow-violet-500/10"
+  1275→                        : "border-white/10 bg-white/[0.02] text-zinc-400 hover:border-violet-400/40 hover:bg-white/[0.05] hover:text-zinc-200"
+  1276→                    )}
+  1277→                  >
+  1278→                    <span
+  1279→                      className={cn(
+  1280→                        "mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[9px] font-bold",
+  1281→                        isActive
+  1282→                          ? "bg-gradient-to-br from-violet-500 to-emerald-500 text-white"
+  1283→                          : "bg-white/10 text-zinc-400"
+  1284→                      )}
+  1285→                    >
+  1286→                      {p.id + 1}
+  1287→                    </span>
+  1288→                    <span className="line-clamp-3">{p.label}</span>
+  1289→                  </button>
+  1290→                );
+  1291→              })}
+  1292→            </div>
+  1293→
+  1294→            <Separator className="my-4 bg-white/10" />
+  1295→
+  1296→            <label htmlFor="playground-prompt" className="mb-2 text-[10px] uppercase tracking-wide text-zinc-500">
+  1297→              Prompt
+  1298→            </label>
+  1299→            <Textarea
+  1300→              id="playground-prompt"
+  1301→              value={active.prompt}
+  1302→              readOnly
+  1303→              className="min-h-[80px] resize-none border-white/10 bg-black/40 font-mono text-xs text-zinc-200"
+  1304→            />
+  1305→
+  1306→            <Button
+  1307→              type="button"
+  1308→              onClick={run}
+  1309→              disabled={loading}
+  1310→              className="mt-4 w-full gap-2 bg-gradient-to-r from-violet-600 to-emerald-600 text-white hover:from-violet-500 hover:to-emerald-500 disabled:opacity-70"
+  1311→            >
+  1312→              {loading ? (
+  1313→                <>
+  1314→                  <Loader2 className="h-4 w-4 animate-spin" /> stripe-mcp is thinking…
+  1315→                </>
+  1316→              ) : (
+  1317→                <>
+  1318→                  <Play className="h-4 w-4" fill="currentColor" /> Run with stripe-mcp
+  1319→                </>
+  1320→              )}
+  1321→            </Button>
+  1322→            <p className="mt-2 text-center text-[10px] text-zinc-500">
+  1323→              <Lock className="mr-1 inline h-3 w-3" />
+  1324→              Powered by your local Stripe key — no key, no request leaves your machine.
+  1325→            </p>
+  1326→          </div>
+  1327→        </Reveal>
+  1328→
+  1329→        {/* RIGHT — response panel */}
+  1330→        <Reveal delay={0.08}>
+  1331→          <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#0b0b18]/70 backdrop-blur">
+  1332→            {/* Header */}
+  1333→            <div className="flex items-center gap-2 border-b border-white/10 bg-white/[0.02] px-4 py-3">
+  1334→              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-emerald-500 text-white">
+  1335→                <Sparkles className="h-3 w-3" />
+  1336→              </span>
+  1337→              <span className="text-xs font-medium text-zinc-200">stripe-mcp</span>
+  1338→              <span className="text-[10px] text-zinc-500">• assistant</span>
+  1339→              <span className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-300">
+  1340→                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> ready
+  1341→              </span>
+  1342→            </div>
+  1343→
+  1344→            {/* Body */}
+  1345→            <div className="min-h-[420px] flex-1 overflow-y-auto p-4 smcp-scrollbar">
+  1346→              {loading ? (
+  1347→                <motion.div
+  1348→                  key={`loading-${runToken}-${activeId}`}
+  1349→                  initial={reduce ? false : { opacity: 0 }}
+  1350→                  animate={{ opacity: 1 }}
+  1351→                  transition={{ duration: 0.2 }}
+  1352→                  className="flex h-full flex-col items-center justify-center gap-3 py-16 text-center"
+  1353→                >
+  1354→                  <Loader2 className="h-8 w-8 animate-spin text-violet-300" />
+  1355→                  <p className="text-sm text-zinc-300">stripe-mcp is thinking…</p>
+  1356→                  <p className="text-[11px] text-zinc-500">calling {active.tool.split(" ")[0]}…</p>
+  1357→                </motion.div>
+  1358→              ) : (
+  1359→                <motion.div
+  1360→                  key={`response-${runToken}-${activeId}`}
+  1361→                  initial={reduce ? false : { opacity: 0, y: 8 }}
+  1362→                  animate={{ opacity: 1, y: 0 }}
+  1363→                  transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+  1364→                >
+  1365→                  {active.render()}
+  1366→                </motion.div>
+  1367→              )}
+  1368→            </div>
+  1369→
+
+[showing lines 770-1369 of 2528; use offset=1370 with limit to continue reading]

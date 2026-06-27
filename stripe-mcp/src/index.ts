@@ -4,9 +4,9 @@ import { config } from './config.js';
 import { handleCliArgs } from './cli.js';
 
 async function main(): Promise<void> {
-  // Handle --help / --version / --list-tools / --list-categories first.
-  // These exit early and never start the stdio server.
-  if (handleCliArgs(process.argv)) {
+  // Handle --help / --version / --list-tools / --list-categories / --doctor
+  // first. These exit early and never start the stdio server.
+  if (await handleCliArgs(process.argv)) {
     return;
   }
 

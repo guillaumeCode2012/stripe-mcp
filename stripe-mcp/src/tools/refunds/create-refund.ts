@@ -5,18 +5,22 @@ import { getStripeClient } from '../../config.js';
 import { formatStripeError } from '../../utils/format-stripe-error.js';
 import { buildStripeParams } from '../../utils/object.js';
 
-const inputSchema = z.object({
-  payment_intent: z.string().optional().describe('ID of the PaymentIntent to refund (e.g. pi_1abc23)'),
-  charge: z.string().optional().describe('ID of the charge to refund (e.g. ch_1abc23)'),
-  amount: z.number().int().min(1).optional().describe('Amount to refund in smallest currency unit; defaults to full refund'),
-  reason: z
-    .enum(['duplicate', 'fraudulent', 'requested_by_customer', 'expired_uncaptured_charge'])
-    .optional()
-    .describe('Reason for the refund'),
-  metadata: z.record(z.string(), z.string()).optional().describe('Set of key-value pairs to attach to the object'),
-  refund_application_fee: z.boolean().optional().describe('Refund the application fee on a Connect charge'),
-  reverse_transfer: z.boolean().optional().describe('Reverse the transfer on a Connect charge'),
-});
+const inputSchema = z
+  .object({
+    payment_intent: z.string().optional().describe('ID of the PaymentIntent to refund (e.g. pi_1abc23)'),
+    charge: z.string().optional().describe('ID of the charge to refund (e.g. ch_1abc23)'),
+    amount: z.number().int().min(1).optional().describe('Amount to refund in smallest currency unit; defaults to full refund'),
+    reason: z
+      .enum(['duplicate', 'fraudulent', 'requested_by_customer', 'expired_uncaptured_charge'])
+      .optional()
+      .describe('Reason for the refund'),
+    metadata: z.record(z.string(), z.string()).optional().describe('Set of key-value pairs to attach to the object'),
+    refund_application_fee: z.boolean().optional().describe('Refund the application fee on a Connect charge'),
+    reverse_transfer: z.boolean().optional().describe('Reverse the transfer on a Connect charge'),
+  })
+  .refine((data) => Boolean(data.payment_intent || data.charge), {
+    message: 'Either payment_intent or charge is required to identify what to refund.',
+  });
 
 export const toolDefinition: ToolDefinition = {
   definition: {

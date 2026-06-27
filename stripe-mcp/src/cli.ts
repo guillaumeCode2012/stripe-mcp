@@ -1,5 +1,6 @@
 import { allTools, TOOL_COUNT } from './tools/index.js';
 import { config } from './config.js';
+import { runDoctor } from './doctor.js';
 
 /**
  * Lightweight CLI argument handling for stripe-mcp.
@@ -12,6 +13,10 @@ import { config } from './config.js';
  *                       debugging, and generating docs.
  *   --list-categories   Print the distinct tool categories with counts as
  *                       JSON and exit.
+ *   --doctor            Run a health check: verifies STRIPE_SECRET_KEY,
+ *                       authenticates against Stripe, prints account info,
+ *                       and checks the tool catalogue + Node version.
+ *                       Prints to stderr; exits 0 on success, 1 on failure.
  *   (no args)           Run the MCP server over stdio (default behaviour).
  *
  * Returns `true` if a CLI flag was handled (and the process should exit),
@@ -19,10 +24,10 @@ import { config } from './config.js';
  *
  * The MCP protocol speaks JSON-RPC over stdio, so we write CLI output to
  * stdout for machine-readable flags (--list-tools, --list-categories) and to
- * stderr for human-readable help/version — this keeps the stdio transport
- * clean when the server runs.
+ * stderr for human-readable help/version/doctor — this keeps the stdio
+ * transport clean when the server runs.
  */
-export function handleCliArgs(argv: string[]): boolean {
+export async function handleCliArgs(argv: string[]): Promise<boolean> {
   const args = argv.slice(2);
 
   if (args.length === 0) {
@@ -55,11 +60,6 @@ export function handleCliArgs(argv: string[]): boolean {
     const counts = new Map<string, number>();
     for (const t of allTools) {
       const name = t.definition.name;
-      // Tool names follow `stripe_<category>_<action>` where the action may
-      // itself contain underscores (e.g. stripe_analytics_get_mrr). We match
-      // against the known category list (longest first so that
-      // "payment-intents" wins over "payment-links" style prefixes — though
-      // here they're disjoint, the ordering is defensive).
       const category = KNOWN_CATEGORIES.find((c) =>
         name.startsWith(`stripe_${c.replace(/-/g, '_')}_`),
       );
@@ -70,6 +70,14 @@ export function handleCliArgs(argv: string[]): boolean {
       .map(([category, count]) => ({ category, count }))
       .sort((a, b) => a.category.localeCompare(b.category));
     process.stdout.write(`${JSON.stringify({ total: TOOL_COUNT, categories: payload }, null, 2)}\n`);
+    return true;
+  }
+
+  if (has('--doctor')) {
+    const allOk = await runDoctor();
+    // The caller (index.ts main) will exit 0 on return; signal failure via
+    // process.exitCode so any pending I/O flushes first.
+    if (!allOk) process.exitCode = 1;
     return true;
   }
 
@@ -121,6 +129,10 @@ FLAGS
   --list-tools                Print all ${TOOL_COUNT} registered tools
                               (name + description) as JSON to stdout.
   --list-categories           Print tool categories with counts as JSON.
+  --doctor                    Run a health check: verifies your Stripe key,
+                              authenticates, prints account info, and checks
+                              the tool catalogue + Node version. Exits 1 on
+                              failure. Great for debugging install issues.
 
 ENVIRONMENT
   STRIPE_SECRET_KEY           Required. sk_test_... (test) or sk_live_... (live).

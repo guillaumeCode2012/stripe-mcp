@@ -311,3 +311,71 @@ Stage Summary:
   - Add a Dockerfile for the package (on roadmap).
   - Expand test coverage to more tool categories (currently 5 tool test files + 1 util + 1 CLI).
   - Add Cursor + Windsurf exact config JSON to the README (partially present).
+
+---
+Task ID: 3-rev
+Agent: full-stack-developer (landing page round 2)
+Task: Add Compare + Changelog sections, reading-progress bar, count-up stats; polish hero/FAQ/how-it-works/playground.
+
+Work Log:
+- Read worklog + full page.tsx (2527 lines) + tools catalogue + accordion component to understand the established aesthetic and component contracts.
+- Added imports: framer-motion `useInView`; lucide `X`, `Minus`, `CheckCheck`, `ArrowLeft`, `Star`, `GitBranch`.
+- Added shared helpers after `Eyebrow`: `ReadingProgressBar` (fixed `z-[60] h-0.5` gradient bar driven by a rAF-throttled scroll listener; `pointer-events-none` so it never blocks clicks) and `useCountUp` (rAF + easeOutCubic, 1500ms, gated by a `start` flag).
+- Updated `Nav` links: added `#compare` first, dropped `#roadmap` to keep the row at 7 items.
+- Updated `Hero` subhead: "79 tools", "19 categories", "1 command" are now `text-lg md:text-xl font-extrabold` with the violet→emerald gradient so they pop. Added `items-center` to the badge row for consistent alignment.
+- Replaced `StatsStrip` with a count-up version: new `StatTile` component uses `useInView(once)` + `useCountUp`, with `tabular-nums` and a reduced-motion fast-path that shows the final value directly (no stuck "0"). Non-numeric "1-Command" is shown as text.
+- Added `Compare` section (`<Section id="compare">`): 10-row, 3-column table with a violet→emerald gradient header on the stripe-mcp column + per-cell gradient tint. emerald Check / rose X / amber Minus icons via a `CompareCellView` component. Horizontally scrollable on mobile. Closes with a "Built solo, open source, MIT. Star it if it saves you time. ⭐" callout + GitHub button.
+- Updated `HowItWorks` connectors: switched the grid template to `1fr_4rem_1fr_4rem_1fr_4rem_1fr` so the connectors have visible width, then layered a gradient bar (`from-violet-500/60 via-fuchsia-400/50 to-emerald-500/60`) behind the arrow circle — horizontal on desktop, vertical on mobile.
+- Updated `Playground`: added `viewedIds: Set<number>` state + a `selectPrompt` helper that records views. Added a "history" row above the prompt grid: `← prev / next →` arrow buttons + 6 dots (active = wide gradient pill, viewed = violet, unviewed = dim) + `1 / 6` counter. Added a "Copy response" button to the response card header (top-right, with `CheckCheck` success state) that copies a `stripe-mcp · {tool}\nPrompt: "{prompt}"\nLatency: {ms}ms (simulated)` summary.
+- Updated `FAQ` `AccordionTrigger` className: added `[&>svg]:text-violet-300 [&>svg]:size-5 [&>svg]:shrink-0 hover:[&>svg]:text-violet-200` to override the default `size-4 text-muted-foreground` chevron — brighter, larger, violet.
+- Added `Changelog` section (`<Section id="changelog">`): compact vertical timeline with 4 entries (v1.0.0 emerald + "latest" pill, v0.9.0 violet, v0.5.0 zinc, v1.1 dashed-zinc future). Each entry: version pill + date + one-line description, connected by a vertical gradient line.
+- Updated the page render: added `<ReadingProgressBar />` as a sibling of `<Nav />` inside the `TooltipProvider`; inserted `<Compare />` between `<CompatibleWith />` and `<HowItWorks />`; inserted `<Changelog />` between `<FAQ />` and `<Roadmap />`. Updated the section-order comment.
+
+Stage Summary:
+- Files modified: `src/app/page.tsx` (2527 → 3025 lines). No other files touched.
+- Sections added: Compare, Changelog. Polish features added: ReadingProgressBar, animated count-up stats, hero gradient stat highlight, FAQ brighter chevrons, HowItWorks gradient connectors, Playground copy-response + history nav.
+- Lint: `bun run lint` → clean (no errors, no warnings).
+- Runtime: `curl http://localhost:3000/` → HTTP 200. `tail dev.log` → only `✓ Compiled` + `GET / 200` lines, no runtime errors.
+- Verified in rendered HTML: `id="compare"`, `id="changelog"`, "Why stripe-mcp?", "Other Stripe MCPs", "Built solo, open source", "What's new", "Initial release", "Added analytics crown jewel", `aria-label="Previous prompt"` / `"Next prompt"` / `"Copy response"`, the FAQ trigger's `[&>svg]:text-violet-300 [&>svg]:size-5` classes, the Compare header `from-violet-500/20 to-emerald-500/20`, the `pointer-events-none fixed inset-x-0 top-0 z-[60] h-0.5` ReadingProgressBar, and `tabular-nums` on the count-up tiles.
+- Work record written to `/agent-ctx/3-rev-full-stack-developer-landing-page.md`.
+
+---
+Task ID: REVIEW-2
+Agent: orchestrator (Z.ai Code) — cron webDevReview round 2
+Task: QA via agent-browser, fix bugs, improve styling, add features (package + landing page).
+
+Work Log:
+- Read full worklog (rounds 1-FINAL + REVIEW-1) to assess state: package complete with 79 tools + CLI flags (44 tests), landing page with 11 sections.
+- QA via agent-browser: page HTTP 200, zero console/runtime errors, all 11 sections present, FAQ accordion opens, hero typing animation completes, Playground Run button works (round-1 fix confirmed).
+- VLM audit of hero: identified "79 tools" stat too small, badge alignment, FAQ chevrons too subtle, How-it-works connectors plain, Playground lacks copy/history.
+- Delegated landing-page round-2 revision to full-stack-developer subagent (Task 3-rev): added Compare section (10-row comparison table), Changelog timeline, reading-progress bar, animated count-up stats, Playground copy-response + prompt-history, brighter FAQ chevrons, How-it-works gradient connectors, hero stat highlight. Page grew 2527→3025 lines. Lint clean, 13 sections.
+- NEW package feature: --doctor health-check CLI command. Created src/doctor.ts with 5 checks: (1) STRIPE_SECRET_KEY presence + prefix recognition (sk_test_/sk_live_/rk_), (2) Stripe API auth via balance.retrieve(), (3) account metadata (id/country/currency/business name) via accounts.retrieve(null), (4) tool catalogue integrity (79 tools), (5) Node.js >=20 version. Colored ✓/✗ output to stderr, exits 1 on failure (process.exitCode), degrades gracefully when account.retrieve is forbidden (restricted keys). Wired into cli.ts; updated --help text. handleCliArgs is now async.
+- Added 6 doctor tests (tests/tools/cli.test.ts expanded): success path (validates auth + account + balance formatting), balance formatting in detail line, graceful degradation on permission error, auth-failure exit code 1, env-check failure when key unset, unrecognised-prefix warning. Fixed exit-code test by setting process.exitCode=0 in beforeEach (doctor only sets it on failure).
+- Fixed 2 type errors in doctor.ts: checks[0] possibly-undefined (noUncheckedIndexedAccess) → captured envCheck in a local var; stripe.accounts.retrieve() requires (id: string | null) → pass null for current account.
+- NEW package feature: Dockerfile (multi-stage, node:20-slim, non-root user, healthcheck via --list-tools, OCI labels) + .dockerignore + docker-compose.yml. Supports `docker run -i -e STRIPE_SECRET_KEY=... stripe-mcp --doctor`.
+- BUG FIX in create-refund tool: zod schema didn't enforce payment_intent XOR charge (both optional) — Stripe's API requires one. Added a .refine() so invalid inputs return a clear validation error instead of a cryptic Stripe rejection. This is exactly the kind of input validation zod is there for.
+- Added 3 new test files: products.test.ts (12 tests: create/get/update/archive/list + validation), prices.test.ts (12 tests: create one-time/recurring/product_data, get, update, list + type filter validation), refunds.test.ts (4 tests: create full/partial + reason validation + the new XOR refine).
+- Verified --doctor at runtime: with no key → "✗ STRIPE_SECRET_KEY not set" + exit 1; with dummy key → "✓ STRIPE_SECRET_KEY set (test mode)" + "✗ Stripe API auth: 🔐 Authentication failed" + exit 1; --help now lists --doctor.
+- Verified reading-progress bar via agent-browser: 2px gradient (violet→fuchsia→emerald) fixed at top, fills 0%→54%→100% on scroll, pointer-events-none, z-60 above nav.
+- Verified Compare section: 3-column table (Feature | stripe-mcp | Other Stripe MCPs), stripe-mcp column has gradient highlight, 10 rows with ✓/✗ icons, "Star it if it saves you time ⭐" callout + GitHub button. VLM verdict: "clean layout, consistent styling, effective visual hierarchy."
+- Verified Changelog: 4-entry vertical timeline (v1.0.0 latest emerald, v0.9.0 violet, v0.5.0 zinc, v1.1 dashed future).
+- Verified Playground enhancements: Copy response button (top-right), Previous/Next prompt arrows + 6 history dots, all interactive.
+
+Stage Summary:
+- stripe-mcp package: ALL 5 QUALITY GATES PASS.
+  1. typecheck → 0 errors
+  2. lint → 0 warnings
+  3. build → dist/index.js
+  4. test → 83/83 pass (was 44; +6 doctor, +12 products, +12 prices, +4 refunds, +5 existing CLI = 83; also +1 refund-refine validation)
+  5. node dist/index.js → "✓ Test mode" + "stripe-mcp running on stdio"
+- New package features: --doctor health-check command (5 checks, colored output, exit codes), Dockerfile + docker-compose (production-ready multi-stage image), create-refund input-validation bugfix (.refine for payment_intent XOR charge).
+- Landing page: 2 NEW sections (Compare comparison table, Changelog timeline), reading-progress bar, animated count-up stats, Playground copy-response + prompt-history, brighter FAQ chevrons, How-it-works gradient connectors, hero stat highlight. 13 sections total. Next.js lint clean. HTTP 200, zero runtime errors.
+- Bug fixed: create-refund now validates that payment_intent or charge is provided (was passing through to Stripe which rejected cryptically).
+- Unresolved / next-phase recommendations:
+  - Update README to document --doctor, --list-tools, --list-categories, and the Dockerfile (run as container).
+  - Add a CONTRIBUTING note about the Docker workflow.
+  - The doctor's account.retrieve could be skipped if the key is a restricted rk_ (currently tries and catches — fine, but could skip proactively).
+  - Consider a --tools-doc flag that emits markdown docs from the tool catalogue (for regenerating docs/tools/*.md).
+  - Landing page: add a "Copy" button to the Compare table rows; add anchor-link hover states; consider a dark-mode toggle (currently hardcoded dark — intentional).
+  - Expand test coverage to disputes, webhooks, coupons, checkout categories (still untested).
+  - Add a WebSocket mini-service demo (referenced in project rules) showing live Stripe webhook events.

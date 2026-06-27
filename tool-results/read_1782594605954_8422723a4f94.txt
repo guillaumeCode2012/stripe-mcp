@@ -1,0 +1,609 @@
+  1920→
+  1921→      <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+  1922→        {prompts.map((p, i) => (
+  1923→          <Reveal key={p.text} delay={i * 0.05}>
+  1924→            <div className="group flex h-full flex-col gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur transition-all hover:-translate-y-0.5 hover:border-violet-400/40 hover:bg-white/[0.05]">
+  1925→              <div className="flex items-center gap-2">
+  1926→                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/10 text-[10px] font-semibold text-zinc-300">
+  1927→                  you
+  1928→                </span>
+  1929→                <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] text-zinc-400">
+  1930→                  {p.tag}
+  1931→                </span>
+  1932→              </div>
+  1933→              <p className="text-sm text-zinc-200">“{p.text}”</p>
+  1934→              <div className="mt-auto flex items-center gap-1.5 text-xs text-zinc-500 opacity-0 transition-opacity group-hover:opacity-100">
+  1935→                <Sparkles className="h-3 w-3 text-violet-300" /> Claude routes this to the right tool
+  1936→                automatically.
+  1937→              </div>
+  1938→            </div>
+  1939→          </Reveal>
+  1940→        ))}
+  1941→      </div>
+  1942→    </Section>
+  1943→  );
+  1944→}
+  1945→
+  1946→/* ────────────────────────────────────────────────────────────────────────────
+  1947→ * 11. Safety — read-only vs destructive + live/test banner
+  1948→ * ──────────────────────────────────────────────────────────────────────── */
+  1949→
+  1950→function Safety() {
+  1951→  const readOnly = [
+  1952→    "stripe_customers_get / list / search",
+  1953→    "stripe_products_get / list",
+  1954→    "stripe_prices_get / list",
+  1955→    "stripe_subscriptions_get / list / search",
+  1956→    "stripe_invoices_get / list",
+  1957→    "stripe_payment_intents_get / list",
+  1958→    "stripe_refunds_get / list",
+  1959→    "stripe_disputes_get / list",
+  1960→    "stripe_webhooks_get / list",
+  1961→    "stripe_balance_get / list_transactions",
+  1962→    "stripe_analytics_* (all 5)",
+  1963→  ];
+  1964→  const destructive = [
+  1965→    "stripe_customers_create / update / delete",
+  1966→    "stripe_products_create / update / archive",
+  1967→    "stripe_subscriptions_create / update / cancel / pause / resume",
+  1968→    "stripe_invoices_pay / void / finalize / send",
+  1969→    "stripe_payment_intents_create / confirm / cancel",
+  1970→    "stripe_refunds_create",
+  1971→    "stripe_disputes_update / close",
+  1972→    "stripe_webhooks_create / update / delete",
+  1973→    "stripe_payouts_create / cancel",
+  1974→  ];
+  1975→
+  1976→  return (
+  1977→    <Section id="safety">
+  1978→      <Reveal>
+  1979→        <Eyebrow>
+  1980→          <Shield className="h-3.5 w-3.5 text-emerald-300" /> Safety
+  1981→        </Eyebrow>
+  1982→        <h2 className="text-3xl font-bold tracking-tight text-white md:text-5xl">
+  1983→          Built to be <GradientText>safe by default</GradientText>.
+  1984→        </h2>
+  1985→        <p className="mt-4 max-w-2xl text-zinc-400">
+  1986→          Every tool is classified. Read-only tools can be run freely; mutating tools always print
+  1987→          what they&apos;re about to do. And the server tells you — loudly — when you&apos;re in live
+  1988→          mode.
+  1989→        </p>
+  1990→      </Reveal>
+  1991→
+  1992→      <div className="mt-10 grid gap-5 lg:grid-cols-2">
+  1993→        {/* Read-only */}
+  1994→        <Reveal>
+  1995→          <div className="h-full rounded-2xl border border-emerald-500/30 bg-emerald-500/[0.05] p-6">
+  1996→            <div className="flex items-center gap-2">
+  1997→              <ShieldCheck className="h-5 w-5 text-emerald-400" />
+  1998→              <h3 className="text-lg font-semibold text-white">Read-only · safe</h3>
+  1999→              <span className="ml-auto rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-300">
+  2000→                ~38 tools
+  2001→              </span>
+  2002→            </div>
+  2003→            <p className="mt-2 text-sm text-zinc-400">
+  2004→              <code className="font-mono text-emerald-300">get</code> /{" "}
+  2005→              <code className="font-mono text-emerald-300">list</code> /{" "}
+  2006→              <code className="font-mono text-emerald-300">search</code> /{" "}
+  2007→              <code className="font-mono text-emerald-300">analytics</code> /{" "}
+  2008→              <code className="font-mono text-emerald-300">balance</code>. Never touches state.
+  2009→            </p>
+  2010→            <ul className="mt-4 max-h-72 space-y-1.5 overflow-y-auto smcp-scrollbar pr-1">
+  2011→              {readOnly.map((t) => (
+  2012→                <li key={t} className="flex items-start gap-2 text-xs text-zinc-300">
+  2013→                  <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-400" />
+  2014→                  <code className="font-mono text-[11px] text-zinc-300">{t}</code>
+  2015→                </li>
+  2016→              ))}
+  2017→            </ul>
+  2018→          </div>
+  2019→        </Reveal>
+  2020→
+  2021→        {/* Destructive */}
+  2022→        <Reveal delay={0.08}>
+  2023→          <div className="h-full rounded-2xl border border-amber-500/30 bg-amber-500/[0.05] p-6">
+  2024→            <div className="flex items-center gap-2">
+  2025→              <ShieldAlert className="h-5 w-5 text-amber-400" />
+  2026→              <h3 className="text-lg font-semibold text-white">Mutating · be careful</h3>
+  2027→              <span className="ml-auto rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium text-amber-300">
+  2028→                ~41 tools
+  2029→              </span>
+  2030→            </div>
+  2031→            <p className="mt-2 text-sm text-zinc-400">
+  2032→              <code className="font-mono text-amber-300">create</code> /{" "}
+  2033→              <code className="font-mono text-amber-300">update</code> /{" "}
+  2034→              <code className="font-mono text-amber-300">delete</code> /{" "}
+  2035→              <code className="font-mono text-amber-300">cancel</code> /{" "}
+  2036→              <code className="font-mono text-amber-300">refund</code> /{" "}
+  2037→              <code className="font-mono text-amber-300">void</code>.
+  2038→            </p>
+  2039→            <ul className="mt-4 max-h-72 space-y-1.5 overflow-y-auto smcp-scrollbar pr-1">
+  2040→              {destructive.map((t) => (
+  2041→                <li key={t} className="flex items-start gap-2 text-xs text-zinc-300">
+  2042→                  <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-400" />
+  2043→                  <code className="font-mono text-[11px] text-zinc-300">{t}</code>
+  2044→                </li>
+  2045→              ))}
+  2046→            </ul>
+  2047→          </div>
+  2048→        </Reveal>
+  2049→      </div>
+  2050→
+  2051→      {/* Live vs test banner */}
+  2052→      <Reveal delay={0.12}>
+  2053→        <div className="mt-5 overflow-hidden rounded-2xl border border-amber-500/30 bg-amber-500/[0.05]">
+  2054→          <div className="flex flex-col gap-4 p-6 md:flex-row md:items-center md:justify-between">
+  2055→            <div className="flex items-start gap-3">
+  2056→              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-amber-500/30 bg-amber-500/10 text-amber-300">
+  2057→                <AlertTriangle className="h-5 w-5" />
+  2058→              </span>
+  2059→              <div>
+  2060→                <h3 className="text-base font-semibold text-white">Live mode is loud.</h3>
+  2061→                <p className="mt-1 max-w-xl text-sm text-zinc-400">
+  2062→                  stripe-mcp detects your key prefix — <MonoPill>sk_test_</MonoPill> (safe) vs{" "}
+  2063→                  <MonoPill className="border-amber-500/30 bg-amber-500/10 text-amber-200">sk_live_</MonoPill>{" "}
+  2064→                  (real money). A warning prints on startup in live mode so you always know which
+  2065→                  mode you&apos;re in.
+  2066→                </p>
+  2067→              </div>
+  2068→            </div>
+  2069→
+  2070→            {/* Mock startup banner */}
+  2071→            <pre className="min-w-[20rem] overflow-x-auto rounded-lg border border-white/10 bg-black/50 p-3 font-mono text-[11px] leading-relaxed smcp-scrollbar">
+  2072→{`⚡ stripe-mcp v1.0.0 starting…
+  2073→✓ 79 tools registered
+  2074→✓ stdio transport ready
+  2075→
+  2076→`}<span className="text-amber-300">⚠  LIVE MODE — sk_live_ detected</span>{`
+  2077→   real charges will be created.
+  2078→   press Ctrl+C to abort.`}
+  2079→            </pre>
+  2080→          </div>
+  2081→        </div>
+  2082→      </Reveal>
+  2083→    </Section>
+  2084→  );
+  2085→}
+  2086→
+  2087→/* ────────────────────────────────────────────────────────────────────────────
+  2088→ * 12. Features grid — why it's built this way
+  2089→ * ──────────────────────────────────────────────────────────────────────── */
+  2090→
+  2091→function Features() {
+  2092→  const features = [
+  2093→    { icon: Code2, title: "ESM-first", desc: "Modern, tree-shakeable, native TypeScript." },
+  2094→    { icon: ShieldCheck, title: "Zod-validated inputs", desc: "Every tool's args are parsed and typed." },
+  2095→    { icon: RefreshCw, title: "Auto-pagination", desc: "List endpoints follow cursors automatically." },
+  2096→    { icon: FileText, title: "Typed errors + docs links", desc: "Errors include a Stripe docs URL." },
+  2097→    { icon: CircleDollarSign, title: "Formatted money", desc: "Cents plus “$12.50” in every response." },
+  2098→    { icon: Type, title: "Dual date formats", desc: "Unix timestamps + ISO strings, always." },
+  2099→    { icon: Bug, title: "Mocked tests", desc: "No Stripe account needed to run the suite." },
+  2100→    { icon: Rocket, title: "1-command install", desc: "`npm i -g stripe-mcp` and you're done." },
+  2101→  ];
+  2102→  return (
+  2103→    <Section id="features">
+  2104→      <Reveal>
+  2105→        <Eyebrow>
+  2106→          <Sparkles className="h-3.5 w-3.5 text-violet-300" /> Engineering
+  2107→        </Eyebrow>
+  2108→        <h2 className="text-3xl font-bold tracking-tight text-white md:text-5xl">
+  2109→          Why it&apos;s built <GradientText>this way</GradientText>.
+  2110→        </h2>
+  2111→        <p className="mt-4 max-w-2xl text-zinc-400">
+  2112→          Small, opinionated choices that make the server feel polished instead of a thin wrapper.
+  2113→        </p>
+  2114→      </Reveal>
+  2115→
+  2116→      <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+  2117→        {features.map((f, i) => (
+  2118→          <Reveal key={f.title} delay={i * 0.04}>
+  2119→            <div className="group h-full rounded-2xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur transition-all hover:-translate-y-0.5 hover:border-violet-400/40 hover:bg-white/[0.05]">
+  2120→              <span className="flex h-10 w-10 items-center justify-center rounded-lg border border-violet-500/25 bg-violet-500/10 text-violet-300">
+  2121→                <f.icon className="h-5 w-5" />
+  2122→              </span>
+  2123→              <h3 className="mt-4 text-sm font-semibold text-white">{f.title}</h3>
+  2124→              <p className="mt-1 text-xs leading-relaxed text-zinc-400">{f.desc}</p>
+  2125→            </div>
+  2126→          </Reveal>
+  2127→        ))}
+  2128→      </div>
+  2129→    </Section>
+  2130→  );
+  2131→}
+  2132→
+  2133→/* ────────────────────────────────────────────────────────────────────────────
+  2134→ * 13. FAQ (NEW)
+  2135→ * ──────────────────────────────────────────────────────────────────────── */
+  2136→
+  2137→const FAQ_ITEMS: { q: string; a: React.ReactNode }[] = [
+  2138→  {
+  2139→    q: "Is stripe-mcp safe to use?",
+  2140→    a: (
+  2141→      <>
+  2142→        Yes. It runs entirely locally over stdio. Your Stripe secret key is read from your environment and sent directly to Stripe&apos;s API — it never touches our servers or the AI model provider. We recommend starting with a test key (<MonoPill>sk_test_…</MonoPill>).
+  2143→      </>
+  2144→    ),
+  2145→  },
+  2146→  {
+  2147→    q: "Does it work in live mode?",
+  2148→    a: (
+  2149→      <>
+  2150→        Yes. If your key starts with <MonoPill className="border-amber-500/30 bg-amber-500/10 text-amber-200">sk_live_</MonoPill>, stripe-mcp prints a ⚠️ LIVE MODE warning on startup. All destructive operations work in both modes.
+  2151→      </>
+  2152→    ),
+  2153→  },
+  2154→  {
+  2155→    q: "Which AI clients are supported?",
+  2156→    a: (
+  2157→      <>
+  2158→        Any MCP client: Claude Desktop, Cursor, Windsurf, Cline, Continue, and any future MCP-compatible client. One JSON block to configure.
+  2159→      </>
+  2160→    ),
+  2161→  },
+  2162→  {
+  2163→    q: "Do I need to run a server?",
+  2164→    a: (
+  2165→      <>
+  2166→        No. stripe-mcp communicates over stdio. No HTTP server, no port, no auth. The MCP client spawns it as a child process.
+  2167→      </>
+  2168→    ),
+  2169→  },
+  2170→  {
+  2171→    q: "How are the analytics tools different?",
+  2172→    a: (
+  2173→      <>
+  2174→        Stripe has no native MRR/churn endpoint. stripe-mcp paginates your data and computes MRR, churn, revenue summaries, top customers, and failed-payment reports client-side — matching Baremetrics/ChartMogul methodology. <span className="font-semibold text-zinc-200">No other Stripe MCP ships these.</span>
+  2175→      </>
+  2176→    ),
+  2177→  },
+  2178→  {
+  2179→    q: "What happens if an AI sends bad input?",
+  2180→    a: (
+  2181→      <>
+  2182→        Every tool input is zod-validated at runtime. Invalid inputs return a clear validation error instead of hitting Stripe. Stripe API errors are caught and formatted into actionable messages with doc links.
+  2183→      </>
+  2184→    ),
+  2185→  },
+  2186→  {
+  2187→    q: "Can I use it with multiple Stripe accounts?",
+  2188→    a: (
+  2189→      <>
+  2190→        Currently one account per process (via <MonoPill>STRIPE_SECRET_KEY</MonoPill>). Multi-account is on the roadmap — run multiple instances with different keys in the meantime.
+  2191→      </>
+  2192→    ),
+  2193→  },
+  2194→  {
+  2195→    q: "Is it free?",
+  2196→    a: (
+  2197→      <>
+  2198→        Yes — MIT licensed, free forever. Stripe SDK and MCP SDK are also free. You only pay your normal Stripe fees.
+  2199→      </>
+  2200→    ),
+  2201→  },
+  2202→];
+  2203→
+  2204→function FAQ() {
+  2205→  return (
+  2206→    <Section id="faq">
+  2207→      <Reveal>
+  2208→        <Eyebrow>
+  2209→          <FileText className="h-3.5 w-3.5 text-violet-300" /> FAQ
+  2210→        </Eyebrow>
+  2211→        <h2 className="text-3xl font-bold tracking-tight text-white md:text-5xl">
+  2212→          Frequently asked <GradientText>questions</GradientText>.
+  2213→        </h2>
+  2214→        <p className="mt-4 max-w-2xl text-zinc-400">
+  2215→          Everything you might want to know before running stripe-mcp against your account.
+  2216→        </p>
+  2217→      </Reveal>
+  2218→
+  2219→      <Reveal delay={0.05}>
+  2220→        <div className="mt-10 rounded-2xl border border-white/10 bg-white/[0.03] p-2 backdrop-blur sm:p-4">
+  2221→          <Accordion type="single" collapsible className="w-full">
+  2222→            {FAQ_ITEMS.map((item, i) => (
+  2223→              <AccordionItem
+  2224→                key={i}
+  2225→                value={`item-${i}`}
+  2226→                className="rounded-xl border border-white/5 bg-white/[0.02] px-4 transition-colors data-[state=open]:border-violet-400/30 data-[state=open]:bg-violet-500/[0.04] mb-2 last:mb-0"
+  2227→              >
+  2228→                <AccordionTrigger className="text-left text-sm font-medium text-zinc-100 hover:text-white hover:no-underline sm:text-base">
+  2229→                  <span className="flex items-start gap-3 pr-2">
+  2230→                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-violet-500/30 bg-violet-500/10 font-mono text-[10px] text-violet-300">
+  2231→                      {i + 1}
+  2232→                    </span>
+  2233→                    <span>{item.q}</span>
+  2234→                  </span>
+  2235→                </AccordionTrigger>
+  2236→                <AccordionContent className="text-sm leading-relaxed text-zinc-400">
+  2237→                  <div className="pl-8">{item.a}</div>
+  2238→                </AccordionContent>
+  2239→              </AccordionItem>
+  2240→            ))}
+  2241→          </Accordion>
+  2242→        </div>
+  2243→      </Reveal>
+  2244→    </Section>
+  2245→  );
+  2246→}
+  2247→
+  2248→/* ────────────────────────────────────────────────────────────────────────────
+  2249→ * 14. Roadmap (NEW)
+  2250→ * ──────────────────────────────────────────────────────────────────────── */
+  2251→
+  2252→function Roadmap() {
+  2253→  const columns = [
+  2254→    {
+  2255→      label: "Shipped",
+  2256→      version: "v1.0",
+  2257→      icon: Check,
+  2258→      iconCls: "text-emerald-400",
+  2259→      dotCls: "bg-emerald-400",
+  2260→      accent: "border-emerald-500/30 bg-emerald-500/[0.05]",
+  2261→      headerCls: "text-emerald-300",
+  2262→      items: [
+  2263→        "79 tools across 19 categories",
+  2264→        "5 analytics tools (MRR, churn, revenue, top customers, failed payments)",
+  2265→        "Zod runtime validation on every tool",
+  2266→        "Auto-pagination with listEnvelope",
+  2267→        "Typed errors with Stripe docs links",
+  2268→        "1-command global install",
+  2269→        "Claude / Cursor / Windsurf configs",
+  2270→        "36 mocked tests",
+  2271→      ],
+  2272→    },
+  2273→    {
+  2274→      label: "Next",
+  2275→      version: "v1.1",
+  2276→      icon: CircleDot,
+  2277→      iconCls: "text-violet-300",
+  2278→      dotCls: "bg-violet-400",
+  2279→      accent: "border-violet-500/30 bg-violet-500/[0.05]",
+  2280→      headerCls: "text-violet-200",
+  2281→      items: [
+  2282→        "Multi-account support",
+  2283→        "Webhook event replay",
+  2284→        "Batch operations",
+  2285→        "Expanded test coverage",
+  2286→        "Docker image",
+  2287→        "Stripe Sigma integration",
+  2288→        "TS strict CI matrix",
+  2289→      ],
+  2290→    },
+  2291→    {
+  2292→      label: "Later",
+  2293→      version: "future",
+  2294→      icon: Circle,
+  2295→      iconCls: "text-zinc-400",
+  2296→      dotCls: "bg-zinc-400",
+  2297→      accent: "border-white/10 bg-white/[0.02]",
+  2298→      headerCls: "text-zinc-300",
+  2299→      items: [
+  2300→        "HTTP / SSE transport",
+  2301→        "OAuth flow",
+  2302→        "Custom tool filtering",
+  2303→        "Per-tool permission scopes",
+  2304→        "Web dashboard",
+  2305→        "Plugin system",
+  2306→      ],
+  2307→    },
+  2308→  ];
+  2309→
+  2310→  return (
+  2311→    <Section id="roadmap">
+  2312→      <Reveal>
+  2313→        <Eyebrow>
+  2314→          <Rocket className="h-3.5 w-3.5 text-violet-300" /> Roadmap
+  2315→        </Eyebrow>
+  2316→        <h2 className="text-3xl font-bold tracking-tight text-white md:text-5xl">
+  2317→          What&apos;s here, <GradientText>what&apos;s next</GradientText>.
+  2318→        </h2>
+  2319→        <p className="mt-4 max-w-2xl text-zinc-400">
+  2320→          v1.0 is the foundation — every Stripe resource, every common operation, and the analytics
+  2321→          crown jewel. Here&apos;s where it goes from here.
+  2322→        </p>
+  2323→      </Reveal>
+  2324→
+  2325→      <div className="mt-12 grid gap-5 lg:grid-cols-3">
+  2326→        {columns.map((col, idx) => (
+  2327→          <Reveal key={col.label} delay={idx * 0.08}>
+  2328→            <div className={cn("flex h-full flex-col rounded-2xl border p-6 backdrop-blur", col.accent)}>
+  2329→              <div className="flex items-center gap-2">
+  2330→                <col.icon className={cn("h-5 w-5", col.iconCls)} />
+  2331→                <h3 className={cn("text-lg font-semibold", col.headerCls)}>{col.label}</h3>
+  2332→                <span className="ml-auto rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] font-mono text-zinc-400">
+  2333→                  {col.version}
+  2334→                </span>
+  2335→              </div>
+  2336→              <Separator className="my-4 bg-white/10" />
+  2337→              <ul className="space-y-2.5">
+  2338→                {col.items.map((item) => (
+  2339→                  <li key={item} className="flex items-start gap-2 text-sm text-zinc-300">
+  2340→                    <span className={cn("mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full", col.dotCls)} />
+  2341→                    <span>{item}</span>
+  2342→                  </li>
+  2343→                ))}
+  2344→              </ul>
+  2345→            </div>
+  2346→          </Reveal>
+  2347→        ))}
+  2348→      </div>
+  2349→    </Section>
+  2350→  );
+  2351→}
+  2352→
+  2353→/* ────────────────────────────────────────────────────────────────────────────
+  2354→ * 15. Final CTA
+  2355→ * ──────────────────────────────────────────────────────────────────────── */
+  2356→
+  2357→function FinalCta() {
+  2358→  return (
+  2359→    <Section className="py-16 md:py-24">
+  2360→      <Reveal>
+  2361→        <div className="relative overflow-hidden rounded-3xl border border-violet-500/30 bg-gradient-to-br from-violet-600/20 via-fuchsia-500/10 to-emerald-600/20 p-8 text-center md:p-16">
+  2362→          <div aria-hidden className="pointer-events-none absolute -inset-px -z-10 rounded-3xl bg-gradient-to-br from-violet-500/40 via-transparent to-emerald-500/40 blur-md" />
+  2363→          <div className="pointer-events-none absolute -top-24 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-violet-500/30 blur-3xl" />
+  2364→
+  2365→          <h2 className="text-3xl font-bold tracking-tight text-white md:text-5xl">
+  2366→            Ship payments with your <GradientText>AI assistant today</GradientText>.
+  2367→          </h2>
+  2368→          <p className="mx-auto mt-4 max-w-xl text-zinc-300">
+  2369→            One command. 79 tools. Zero servers. Open source under the MIT license.
+  2370→          </p>
+  2371→
+  2372→          <div className="mx-auto mt-8 flex max-w-md items-center gap-2 rounded-xl border border-white/15 bg-black/50 px-3 py-2.5">
+  2373→            <span className="select-none font-mono text-xs text-zinc-500">$</span>
+  2374→            <code className="flex-1 overflow-x-auto whitespace-nowrap font-mono text-sm text-emerald-300 smcp-scrollbar">
+  2375→              {NPM_CMD}
+  2376→            </code>
+  2377→            <CopyButton value={NPM_CMD} label="Copy" />
+  2378→          </div>
+  2379→
+  2380→          <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
+  2381→            <Button
+  2382→              asChild
+  2383→              size="lg"
+  2384→              className="bg-gradient-to-r from-violet-600 to-emerald-600 text-white hover:from-violet-500 hover:to-emerald-500"
+  2385→            >
+  2386→              <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
+  2387→                <Github className="h-4 w-4" /> Star on GitHub
+  2388→              </a>
+  2389→            </Button>
+  2390→            <Button
+  2391→              asChild
+  2392→              size="lg"
+  2393→              variant="outline"
+  2394→              className="border-violet-400/60 bg-violet-500/10 text-violet-100 hover:border-violet-300 hover:bg-violet-500/20 hover:text-white"
+  2395→            >
+  2396→              <a href="#quickstart">
+  2397→                Read the quickstart <ChevronRight className="h-4 w-4" />
+  2398→              </a>
+  2399→            </Button>
+  2400→          </div>
+  2401→        </div>
+  2402→      </Reveal>
+  2403→    </Section>
+  2404→  );
+  2405→}
+  2406→
+  2407→/* ────────────────────────────────────────────────────────────────────────────
+  2408→ * 16. Footer (sticky bottom)
+  2409→ * ──────────────────────────────────────────────────────────────────────── */
+  2410→
+  2411→function Footer() {
+  2412→  const toolAnchors = categories.slice(0, 6);
+  2413→  return (
+  2414→    <footer className="mt-auto border-t border-white/10 bg-[#06060e]">
+  2415→      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+  2416→        <div className="grid gap-10 md:grid-cols-4">
+  2417→          {/* Brand */}
+  2418→          <div className="md:col-span-1">
+  2419→            <a href="#top" className="flex items-center gap-2.5" aria-label="stripe-mcp home">
+  2420→              <LogoMark className="h-8 w-8" />
+  2421→              <span className="font-mono text-base font-semibold text-zinc-100">stripe-mcp</span>
+  2422→            </a>
+  2423→            <p className="mt-3 text-sm text-zinc-500">
+  2424→              The most complete open-source MCP server for Stripe. 79 tools, one command.
+  2425→            </p>
+  2426→            <Badge variant="outline" className="mt-4 border-white/10 bg-white/[0.03] text-zinc-400">
+  2427→              MIT Licensed
+  2428→            </Badge>
+  2429→          </div>
+  2430→
+  2431→          {/* Tools */}
+  2432→          <nav aria-label="Tools">
+  2433→            <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Tools</h3>
+  2434→            <ul className="mt-4 space-y-2">
+  2435→              {toolAnchors.map((c) => (
+  2436→                <li key={c}>
+  2437→                  <a href="#tools" className="text-sm text-zinc-500 transition-colors hover:text-zinc-200">
+  2438→                    {c}
+  2439→                  </a>
+  2440→                </li>
+  2441→              ))}
+  2442→              <li>
+  2443→                <a href="#tools" className="text-sm text-zinc-500 transition-colors hover:text-zinc-200">
+  2444→                  + 13 more categories
+  2445→                </a>
+  2446→              </li>
+  2447→            </ul>
+  2448→          </nav>
+  2449→
+  2450→          {/* Resources */}
+  2451→          <nav aria-label="Resources">
+  2452→            <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Resources</h3>
+  2453→            <ul className="mt-4 space-y-2">
+  2454→              <li><a href="#quickstart" className="text-sm text-zinc-500 transition-colors hover:text-zinc-200">Quickstart</a></li>
+  2455→              <li><a href="#playground" className="text-sm text-zinc-500 transition-colors hover:text-zinc-200">Playground</a></li>
+  2456→              <li><a href="#faq" className="text-sm text-zinc-500 transition-colors hover:text-zinc-200">FAQ</a></li>
+  2457→              <li><a href="#roadmap" className="text-sm text-zinc-500 transition-colors hover:text-zinc-200">Roadmap</a></li>
+  2458→              <li><a href={GITHUB_URL} target="_blank" rel="noopener noreferrer" className="text-sm text-zinc-500 transition-colors hover:text-zinc-200">GitHub</a></li>
+  2459→              <li><a href="https://www.npmjs.com/package/stripe-mcp" target="_blank" rel="noopener noreferrer" className="text-sm text-zinc-500 transition-colors hover:text-zinc-200">npm</a></li>
+  2460→              <li><a href="https://docs.stripe.com/" target="_blank" rel="noopener noreferrer" className="text-sm text-zinc-500 transition-colors hover:text-zinc-200">Stripe docs</a></li>
+  2461→              <li><a href="https://modelcontextprotocol.io/" target="_blank" rel="noopener noreferrer" className="text-sm text-zinc-500 transition-colors hover:text-zinc-200">MCP spec</a></li>
+  2462→            </ul>
+  2463→          </nav>
+  2464→
+  2465→          {/* Community */}
+  2466→          <nav aria-label="Community">
+  2467→            <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Community</h3>
+  2468→            <ul className="mt-4 space-y-2">
+  2469→              <li><a href={GITHUB_URL} target="_blank" rel="noopener noreferrer" className="text-sm text-zinc-500 transition-colors hover:text-zinc-200">Contributing</a></li>
+  2470→              <li><a href={`${GITHUB_URL}/issues`} target="_blank" rel="noopener noreferrer" className="text-sm text-zinc-500 transition-colors hover:text-zinc-200">Issues</a></li>
+  2471→              <li><a href={`${GITHUB_URL}/discussions`} target="_blank" rel="noopener noreferrer" className="text-sm text-zinc-500 transition-colors hover:text-zinc-200">Discussions</a></li>
+  2472→              <li><a href="#prompts" className="text-sm text-zinc-500 transition-colors hover:text-zinc-200">Example prompts</a></li>
+  2473→            </ul>
+  2474→          </nav>
+  2475→        </div>
+  2476→
+  2477→        <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-white/5 pt-6 sm:flex-row">
+  2478→          <p className="text-xs text-zinc-600">
+  2479→            MIT License · Built for GitHub virality
+  2480→          </p>
+  2481→          <div className="flex items-center gap-1.5 text-xs text-zinc-500">
+  2482→            <Zap className="h-3.5 w-3.5 text-violet-400" fill="currentColor" />
+  2483→            <span className="font-mono">stripe-mcp</span>
+  2484→          </div>
+  2485→        </div>
+  2486→      </div>
+  2487→    </footer>
+  2488→  );
+  2489→}
+  2490→
+  2491→/* ────────────────────────────────────────────────────────────────────────────
+  2492→ * Page — final section order:
+  2493→ * 1. Hero → 2. Stats strip → 3. Compatible with → 4. How it works (NEW)
+  2494→ * → 5. Quickstart → 6. Playground (NEW) → 7. Tools table → 8. Analytics
+  2495→ * → 9. Example prompts → 10. Safety → 11. Features → 12. FAQ (NEW)
+  2496→ * → 13. Roadmap (NEW) → 14. Final CTA → 15. Footer
+  2497→ * ──────────────────────────────────────────────────────────────────────── */
+  2498→
+  2499→export default function Home() {
+  2500→  return (
+  2501→    <div className="min-h-screen bg-[#070710] text-zinc-100">
+  2502→      {/* Page wrapper ensures the footer sticks to the bottom on short content. */}
+  2503→      <div className="flex min-h-screen flex-col">
+  2504→        <TooltipProvider delayDuration={200}>
+  2505→          <Nav />
+  2506→          <main className="flex-1">
+  2507→            <Hero />
+  2508→            <StatsStrip />
+  2509→            <CompatibleWith />
+  2510→            <HowItWorks />
+  2511→            <Quickstart />
+  2512→            <Playground />
+  2513→            <ToolsTable />
+  2514→            <AnalyticsSpotlight />
+  2515→            <ExamplePrompts />
+  2516→            <Safety />
+  2517→            <Features />
+  2518→            <FAQ />
+  2519→            <Roadmap />
+  2520→            <FinalCta />
+  2521→          </main>
+  2522→          <Footer />
+  2523→        </TooltipProvider>
+  2524→      </div>
+  2525→    </div>
+  2526→  );
+  2527→}
+  2528→

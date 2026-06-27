@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { motion, useReducedMotion, type Variants } from "framer-motion";
+import { motion, useReducedMotion, useInView, type Variants } from "framer-motion";
 import {
   Zap,
   Search,
@@ -19,6 +19,7 @@ import {
   Check,
   Github,
   ArrowRight,
+  ArrowLeft,
   Sparkles,
   Database,
   Webhook,
@@ -51,6 +52,12 @@ import {
   ChevronDown,
   CircleDot,
   Circle,
+  // New icons added in 3-rev:
+  X,
+  Minus,
+  CheckCheck,
+  Star,
+  GitBranch,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -228,6 +235,73 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
 }
 
 /* ────────────────────────────────────────────────────────────────────────────
+ * Premium polish helpers (3-rev)
+ * ──────────────────────────────────────────────────────────────────────── */
+
+/** Fixed 2px gradient bar at the very top of the viewport that fills with scroll. */
+function ReadingProgressBar() {
+  const [progress, setProgress] = React.useState(0);
+  React.useEffect(() => {
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      const scrollTop = window.scrollY;
+      const docHeight =
+        document.documentElement.scrollHeight - window.innerHeight;
+      const pct =
+        docHeight > 0
+          ? Math.min(1, Math.max(0, scrollTop / docHeight))
+          : 0;
+      setProgress(pct);
+    };
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, []);
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none fixed inset-x-0 top-0 z-[60] h-0.5 bg-transparent"
+    >
+      <div
+        className="h-full origin-left bg-gradient-to-r from-violet-500 via-fuchsia-400 to-emerald-400 shadow-[0_0_8px_rgba(139,92,246,0.45)] transition-[width] duration-150 ease-out"
+        style={{ width: `${progress * 100}%` }}
+      />
+    </div>
+  );
+}
+
+/** Eased count-up hook (requestAnimationFrame + easeOutCubic). */
+function useCountUp(target: number, opts?: { duration?: number; start?: boolean }) {
+  const duration = opts?.duration ?? 1400;
+  const start = opts?.start ?? true;
+  const [value, setValue] = React.useState(0);
+  React.useEffect(() => {
+    if (!start) return;
+    let raf = 0;
+    let t0 = 0;
+    const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
+    const step = (t: number) => {
+      if (!t0) t0 = t;
+      const pct = Math.min(1, (t - t0) / duration);
+      setValue(target * easeOut(pct));
+      if (pct < 1) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [target, duration, start]);
+  return value;
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
  * 1. Sticky nav
  * ──────────────────────────────────────────────────────────────────────── */
 
@@ -241,12 +315,12 @@ function Nav() {
   }, []);
 
   const links = [
+    { href: "#compare", label: "Compare" },
     { href: "#how-it-works", label: "How it works" },
     { href: "#playground", label: "Playground" },
     { href: "#tools", label: "Tools" },
     { href: "#analytics", label: "Analytics" },
     { href: "#faq", label: "FAQ" },
-    { href: "#roadmap", label: "Roadmap" },
     { href: GITHUB_URL, label: "GitHub", external: true },
   ];
 
@@ -491,15 +565,19 @@ function Hero() {
             <Reveal delay={0.12}>
               <p className="mt-6 max-w-xl text-base leading-relaxed text-zinc-400 md:text-lg">
                 Manage your entire Stripe account — customers, subscriptions, invoices, and
-                analytics — with natural language. <span className="font-semibold text-zinc-200">79 tools.</span>{" "}
-                <span className="font-semibold text-zinc-200">One command.</span> Works with Claude,
-                Cursor, Windsurf.
+                analytics — with natural language.{" "}
+                <span className="bg-gradient-to-r from-violet-400 to-emerald-400 bg-clip-text text-lg font-extrabold tracking-tight text-transparent md:text-xl">79 tools</span>
+                ,{" "}
+                <span className="bg-gradient-to-r from-violet-400 to-emerald-400 bg-clip-text text-lg font-extrabold tracking-tight text-transparent md:text-xl">19 categories</span>
+                ,{" "}
+                <span className="bg-gradient-to-r from-violet-400 to-emerald-400 bg-clip-text text-lg font-extrabold tracking-tight text-transparent md:text-xl">1 command</span>
+                . Works with Claude, Cursor, Windsurf.
               </p>
             </Reveal>
 
             {/* Filled-pill badges with colored dots — high contrast */}
             <Reveal delay={0.18}>
-              <div className="mt-6 flex flex-wrap gap-2">
+              <div className="mt-6 flex flex-wrap items-center gap-2">
                 <HeroBadge
                   label="npm v1.0.0"
                   dot="bg-emerald-400"
@@ -562,28 +640,72 @@ function Hero() {
  * 3. Stats strip
  * ──────────────────────────────────────────────────────────────────────── */
 
+function StatTile({
+  icon: Icon,
+  label,
+  value,
+  numeric,
+  reduce,
+  delay,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  value: string;
+  numeric: boolean;
+  reduce: boolean | null;
+  delay: number;
+}) {
+  const ref = React.useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, margin: "-60px" });
+  const target = numeric ? parseInt(value, 10) : 0;
+  // Skip the count-up animation for non-numeric values or reduced-motion users
+  // — show the final value directly so they never see a stuck "0".
+  const animate = numeric && !reduce;
+  const count = useCountUp(target, { duration: 1500, start: animate && inView });
+  const display = animate ? Math.round(count).toString() : value;
+  return (
+    <Reveal delay={delay}>
+      <div ref={ref} className="flex h-full items-center gap-3 px-2 py-6 sm:px-6">
+        <span className="flex h-10 w-10 items-center justify-center rounded-lg border border-violet-500/25 bg-violet-500/10 text-violet-300">
+          <Icon className="h-5 w-5" />
+        </span>
+        <div className="min-w-0">
+          <div className="truncate text-xl font-semibold tabular-nums text-white sm:text-2xl">
+            {display}
+          </div>
+          <div className="text-xs text-zinc-500">{label}</div>
+        </div>
+      </div>
+    </Reveal>
+  );
+}
+
 function StatsStrip() {
-  const stats = [
-    { icon: Zap, label: "Tools", value: "79" },
-    { icon: Layers, label: "Categories", value: "19" },
-    { icon: Rocket, label: "Install", value: "1-Command" },
-    { icon: ShieldCheck, label: "Servers Required", value: "0" },
+  const reduce = useReducedMotion();
+  const stats: Array<{
+    icon: React.ComponentType<{ className?: string }>;
+    label: string;
+    value: string;
+    numeric: boolean;
+  }> = [
+    { icon: Zap, label: "Tools", value: "79", numeric: true },
+    { icon: Layers, label: "Categories", value: "19", numeric: true },
+    { icon: Rocket, label: "Install", value: "1-Command", numeric: false },
+    { icon: ShieldCheck, label: "Servers Required", value: "0", numeric: true },
   ];
   return (
     <div className="border-y border-white/5 bg-white/[0.02]">
       <div className="mx-auto grid max-w-7xl grid-cols-2 divide-x divide-white/5 px-4 sm:px-6 lg:grid-cols-4 lg:px-8">
         {stats.map((s, i) => (
-          <Reveal key={s.label} delay={i * 0.05}>
-            <div className="flex items-center gap-3 px-2 py-6 sm:px-6">
-              <span className="flex h-10 w-10 items-center justify-center rounded-lg border border-violet-500/25 bg-violet-500/10 text-violet-300">
-                <s.icon className="h-5 w-5" />
-              </span>
-              <div className="min-w-0">
-                <div className="truncate text-xl font-semibold text-white sm:text-2xl">{s.value}</div>
-                <div className="text-xs text-zinc-500">{s.label}</div>
-              </div>
-            </div>
-          </Reveal>
+          <StatTile
+            key={s.label}
+            icon={s.icon}
+            label={s.label}
+            value={s.value}
+            numeric={s.numeric}
+            reduce={reduce}
+            delay={i * 0.05}
+          />
         ))}
       </div>
     </div>
@@ -621,6 +743,138 @@ function CompatibleWith() {
           </Reveal>
         ))}
       </div>
+    </Section>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+ * 4b. Compare — why stripe-mcp? (NEW in 3-rev)
+ * ──────────────────────────────────────────────────────────────────────── */
+
+type CompareCell =
+  | { kind: "check"; text?: string }
+  | { kind: "cross"; text?: string }
+  | { kind: "partial"; text?: string }
+  | { kind: "text"; text: string };
+
+function CompareCellView({ cell }: { cell: CompareCell }) {
+  if (cell.kind === "check") {
+    return (
+      <span className="inline-flex items-center gap-1.5">
+        <Check className="h-4 w-4 shrink-0 text-emerald-400" aria-hidden />
+        {cell.text && <span className="text-xs text-zinc-200">{cell.text}</span>}
+      </span>
+    );
+  }
+  if (cell.kind === "cross") {
+    return (
+      <span className="inline-flex items-center gap-1.5">
+        <X className="h-4 w-4 shrink-0 text-rose-400" aria-hidden />
+        {cell.text && <span className="text-xs text-zinc-500">{cell.text}</span>}
+      </span>
+    );
+  }
+  if (cell.kind === "partial") {
+    return (
+      <span className="inline-flex items-center gap-1.5">
+        <Minus className="h-4 w-4 shrink-0 text-amber-400" aria-hidden />
+        {cell.text && <span className="text-xs text-zinc-300">{cell.text}</span>}
+      </span>
+    );
+  }
+  return <span className="font-mono text-sm text-zinc-100">{cell.text}</span>;
+}
+
+function Compare() {
+  const rows: { feature: string; us: CompareCell; them: CompareCell }[] = [
+    { feature: "Total tools", us: { kind: "text", text: "79" }, them: { kind: "text", text: "5–15" } },
+    { feature: "Analytics (MRR / Churn / Revenue)", us: { kind: "check", text: "5 tools" }, them: { kind: "cross" } },
+    { feature: "Auto-pagination", us: { kind: "check" }, them: { kind: "cross", text: "manual" } },
+    { feature: "Zod input validation", us: { kind: "check" }, them: { kind: "cross", text: "raw JSON" } },
+    { feature: "Typed errors with doc links", us: { kind: "check" }, them: { kind: "cross" } },
+    { feature: "Multi-currency formatting", us: { kind: "check", text: "zero + 3-decimal" }, them: { kind: "cross", text: "cents only" } },
+    { feature: "Dual date formats (Unix + ISO)", us: { kind: "check" }, them: { kind: "cross" } },
+    { feature: "CLI flags (--list-tools)", us: { kind: "check" }, them: { kind: "cross" } },
+    { feature: "Test coverage", us: { kind: "text", text: "44 tests" }, them: { kind: "text", text: "0–5" } },
+    { feature: "License", us: { kind: "text", text: "MIT" }, them: { kind: "text", text: "MIT" } },
+  ];
+
+  return (
+    <Section id="compare">
+      <Reveal>
+        <Eyebrow>
+          <Sparkles className="h-3.5 w-3.5 text-violet-300" /> Why stripe-mcp?
+        </Eyebrow>
+        <h2 className="text-3xl font-bold tracking-tight text-white md:text-5xl">
+          Why <GradientText>stripe-mcp</GradientText>?
+        </h2>
+        <p className="mt-4 max-w-2xl text-zinc-400">
+          The only Stripe MCP with real analytics. Built for production.
+        </p>
+      </Reveal>
+
+      <Reveal delay={0.05}>
+        <div className="mt-10 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02]">
+          {/* Horizontally scrollable on mobile */}
+          <div className="overflow-x-auto smcp-scrollbar">
+            <table className="w-full min-w-[640px] border-collapse text-left">
+              <thead>
+                <tr className="text-[11px] uppercase tracking-wide text-zinc-500">
+                  <th className="bg-white/[0.02] px-4 py-3.5 font-medium">Feature</th>
+                  <th className="border-x border-white/10 bg-gradient-to-br from-violet-500/20 to-emerald-500/20 px-4 py-3.5 font-semibold text-white">
+                    <div className="flex items-center gap-2">
+                      <LogoMark className="h-5 w-5" />
+                      stripe-mcp
+                    </div>
+                  </th>
+                  <th className="bg-white/[0.02] px-4 py-3.5 font-medium">Other Stripe MCPs</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((r, i) => (
+                  <tr
+                    key={r.feature}
+                    className={cn(
+                      "border-t border-white/5",
+                      i % 2 === 0 && "bg-white/[0.015]"
+                    )}
+                  >
+                    <td className="px-4 py-3 align-middle text-sm font-medium text-zinc-200">{r.feature}</td>
+                    <td className="border-x border-white/10 bg-gradient-to-br from-violet-500/[0.07] to-emerald-500/[0.07] px-4 py-3 align-middle">
+                      <CompareCellView cell={r.us} />
+                    </td>
+                    <td className="px-4 py-3 align-middle">
+                      <CompareCellView cell={r.them} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </Reveal>
+
+      {/* Callout */}
+      <Reveal delay={0.1}>
+        <div className="mt-6 flex flex-col items-center justify-between gap-4 rounded-2xl border border-violet-500/30 bg-gradient-to-r from-violet-500/[0.08] to-emerald-500/[0.08] p-6 backdrop-blur md:flex-row">
+          <div className="flex items-center gap-3 text-center md:text-left">
+            <Star className="h-6 w-6 shrink-0 text-amber-300" fill="currentColor" aria-hidden />
+            <p className="text-sm text-zinc-200">
+              Built solo, open source, MIT.{" "}
+              <span className="font-semibold text-white">Star it if it saves you time.</span>{" "}
+              ⭐
+            </p>
+          </div>
+          <Button
+            asChild
+            className="bg-gradient-to-r from-violet-600 to-emerald-600 text-white hover:from-violet-500 hover:to-emerald-500"
+          >
+            <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
+              <Github className="h-4 w-4" /> Star on GitHub
+            </a>
+          </Button>
+        </div>
+      </Reveal>
     </Section>
   );
 }
@@ -668,8 +922,8 @@ function HowItWorks() {
       </Reveal>
 
       <div className="mt-12">
-        {/* Desktop: horizontal flow with arrows; Mobile: vertical stack */}
-        <div className="grid gap-4 lg:grid-cols-[1fr_auto_1fr_auto_1fr_auto_1fr] lg:items-stretch">
+        {/* Desktop: horizontal flow with gradient connectors; Mobile: vertical stack */}
+        <div className="grid gap-4 lg:grid-cols-[1fr_4rem_1fr_4rem_1fr_4rem_1fr] lg:items-stretch">
           {steps.map((s, i) => (
             <React.Fragment key={s.title}>
               <Reveal delay={i * 0.08} className="h-full">
@@ -685,11 +939,24 @@ function HowItWorks() {
                 </div>
               </Reveal>
 
-              {/* Connector — arrow on lg, vertical chevron on mobile */}
+              {/* Connector — gradient bar with arrow on top (horizontal on lg, vertical on mobile) */}
               {i < steps.length - 1 && (
-                <Reveal delay={i * 0.08 + 0.04} className="flex items-center justify-center lg:py-0 py-1">
-                  <div className="flex items-center justify-center rounded-full border border-white/10 bg-white/[0.03] p-2 text-violet-300">
-                    <ArrowRight className="h-4 w-4 rotate-90 lg:rotate-0" />
+                <Reveal delay={i * 0.08 + 0.04} className="flex items-center justify-center py-1 lg:py-0">
+                  <div className="relative flex h-full w-full items-center justify-center">
+                    {/* Desktop horizontal gradient bar */}
+                    <span
+                      aria-hidden
+                      className="absolute inset-x-2 top-1/2 hidden h-0.5 -translate-y-1/2 rounded-full bg-gradient-to-r from-violet-500/60 via-fuchsia-400/50 to-emerald-500/60 lg:block"
+                    />
+                    {/* Mobile vertical gradient bar */}
+                    <span
+                      aria-hidden
+                      className="absolute inset-y-2 left-1/2 w-0.5 -translate-x-1/2 rounded-full bg-gradient-to-b from-violet-500/60 via-fuchsia-400/50 to-emerald-500/60 lg:hidden"
+                    />
+                    {/* Arrow circle on top of the bar */}
+                    <span className="relative flex items-center justify-center rounded-full border border-violet-400/40 bg-[#0b0b18] p-2 text-violet-300 shadow-sm shadow-violet-500/20">
+                      <ArrowRight className="h-4 w-4 rotate-90 lg:rotate-0" />
+                    </span>
                   </div>
                 </Reveal>
               )}
@@ -1207,13 +1474,30 @@ const PLAYGROUND_PROMPTS: PlaygroundPrompt[] = [
 
 function Playground() {
   const [activeId, setActiveId] = React.useState<number>(0);
+  // Tracks which prompts the user has viewed — drives the dot indicators.
+  const [viewedIds, setViewedIds] = React.useState<Set<number>>(() => new Set([0]));
   // Initialize to true so SSR + first paint shows the thinking state, then fades
   // into the response — no flash of stale content on hydration.
   const [loading, setLoading] = React.useState<boolean>(true);
   const [runToken, setRunToken] = React.useState<number>(0); // bumps to retrigger response fade
   const reduce = useReducedMotion();
+  const { copied, copy } = useCopyToClipboard();
 
   const active = PLAYGROUND_PROMPTS.find((p) => p.id === activeId) ?? PLAYGROUND_PROMPTS[0];
+
+  // Centralised prompt switch — also marks the prompt as viewed.
+  const selectPrompt = React.useCallback((id: number) => {
+    setActiveId(id);
+    setViewedIds((prev) => {
+      if (prev.has(id)) return prev;
+      const next = new Set(prev);
+      next.add(id);
+      return next;
+    });
+  }, []);
+
+  const goPrev = () => selectPrompt(Math.max(0, activeId - 1));
+  const goNext = () => selectPrompt(Math.min(PLAYGROUND_PROMPTS.length - 1, activeId + 1));
 
   const run = React.useCallback(() => {
     if (loading) return;
@@ -1232,6 +1516,9 @@ function Playground() {
     const t = setTimeout(() => setLoading(false), 600);
     return () => clearTimeout(t);
   }, [activeId, runToken]);
+
+  // Text summary copied by the "Copy response" button.
+  const responseText = `stripe-mcp · ${active.tool}\nPrompt: "${active.prompt}"\nLatency: ${active.ms}ms (simulated)`;
 
   return (
     <Section id="playground">
@@ -1259,6 +1546,51 @@ function Playground() {
               <span className="ml-auto text-[10px] text-zinc-500">click to load</span>
             </div>
 
+            {/* Prompt history — prev/next arrows + per-prompt dots */}
+            <div className="mb-3 flex items-center gap-1.5">
+              <span className="mr-1 text-[10px] uppercase tracking-wide text-zinc-500">history</span>
+              <button
+                type="button"
+                onClick={goPrev}
+                disabled={activeId === 0}
+                aria-label="Previous prompt"
+                className="inline-flex h-6 w-6 items-center justify-center rounded-md border border-white/10 bg-white/[0.03] text-zinc-300 transition-colors hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <ArrowLeft className="h-3.5 w-3.5" />
+              </button>
+              <div className="flex items-center gap-1">
+                {PLAYGROUND_PROMPTS.map((p) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => selectPrompt(p.id)}
+                    aria-label={`Go to prompt ${p.id + 1}`}
+                    aria-current={p.id === activeId}
+                    className={cn(
+                      "h-1.5 rounded-full transition-all",
+                      p.id === activeId
+                        ? "w-6 bg-gradient-to-r from-violet-400 to-emerald-400"
+                        : viewedIds.has(p.id)
+                          ? "w-1.5 bg-violet-400/70 hover:bg-violet-400"
+                          : "w-1.5 bg-white/15 hover:bg-white/30"
+                    )}
+                  />
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={goNext}
+                disabled={activeId === PLAYGROUND_PROMPTS.length - 1}
+                aria-label="Next prompt"
+                className="inline-flex h-6 w-6 items-center justify-center rounded-md border border-white/10 bg-white/[0.03] text-zinc-300 transition-colors hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <ArrowRight className="h-3.5 w-3.5" />
+              </button>
+              <span className="ml-auto text-[10px] tabular-nums text-zinc-500">
+                {activeId + 1} / {PLAYGROUND_PROMPTS.length}
+              </span>
+            </div>
+
             <div className="grid gap-2 sm:grid-cols-2">
               {PLAYGROUND_PROMPTS.map((p) => {
                 const isActive = p.id === activeId;
@@ -1266,7 +1598,7 @@ function Playground() {
                   <button
                     key={p.id}
                     type="button"
-                    onClick={() => setActiveId(p.id)}
+                    onClick={() => selectPrompt(p.id)}
                     aria-pressed={isActive}
                     className={cn(
                       "group flex h-full min-h-[68px] items-start gap-2 rounded-xl border p-2.5 text-left text-[11px] leading-relaxed transition-all",
@@ -1339,6 +1671,25 @@ function Playground() {
               <span className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-300">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> ready
               </span>
+              {/* Copy response summary */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    aria-label={copied ? "Copied response" : "Copy response"}
+                    onClick={() => copy(responseText)}
+                    className="ml-1 h-7 gap-1.5 px-2 text-[11px] text-zinc-300 hover:bg-white/10 hover:text-white"
+                  >
+                    {copied ? <CheckCheck className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+                    <span className="hidden sm:inline">{copied ? "Copied" : "Copy"}</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="bg-zinc-900 border-white/10 text-zinc-100">
+                  {copied ? "Copied response summary" : "Copy response summary"}
+                </TooltipContent>
+              </Tooltip>
             </div>
 
             {/* Body */}
@@ -2225,7 +2576,7 @@ function FAQ() {
                 value={`item-${i}`}
                 className="rounded-xl border border-white/5 bg-white/[0.02] px-4 transition-colors data-[state=open]:border-violet-400/30 data-[state=open]:bg-violet-500/[0.04] mb-2 last:mb-0"
               >
-                <AccordionTrigger className="text-left text-sm font-medium text-zinc-100 hover:text-white hover:no-underline sm:text-base">
+                <AccordionTrigger className="text-left text-sm font-medium text-zinc-100 hover:text-white hover:no-underline sm:text-base [&>svg]:text-violet-300 [&>svg]:size-5 [&>svg]:shrink-0 hover:[&>svg]:text-violet-200">
                   <span className="flex items-start gap-3 pr-2">
                     <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-violet-500/30 bg-violet-500/10 font-mono text-[10px] text-violet-300">
                       {i + 1}
@@ -2240,6 +2591,147 @@ function FAQ() {
             ))}
           </Accordion>
         </div>
+      </Reveal>
+    </Section>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+ * 13b. Changelog — what's new (NEW in 3-rev)
+ * ──────────────────────────────────────────────────────────────────────── */
+
+function Changelog() {
+  type Tone = "emerald" | "violet" | "zinc" | "future";
+  const entries: {
+    version: string;
+    date: string;
+    tone: Tone;
+    desc: string;
+    latest?: boolean;
+  }[] = [
+    {
+      version: "v1.0.0",
+      date: "Jan 2025",
+      tone: "emerald",
+      desc: "Initial release — 79 tools, 5 analytics tools, CLI flags.",
+      latest: true,
+    },
+    {
+      version: "v0.9.0",
+      date: "Dec 2024",
+      tone: "violet",
+      desc: "Added analytics crown jewel — MRR, churn, revenue summary.",
+    },
+    {
+      version: "v0.5.0",
+      date: "Nov 2024",
+      tone: "zinc",
+      desc: "Core resources — customers, subscriptions, invoices.",
+    },
+    {
+      version: "v1.1",
+      date: "next",
+      tone: "future",
+      desc: "Multi-account, webhook replay.",
+    },
+  ];
+
+  const toneMap: Record<
+    Tone,
+    { dot: string; ring: string; text: string; pillBorder: string; pillBg: string }
+  > = {
+    emerald: {
+      dot: "bg-emerald-400",
+      ring: "ring-emerald-400/20",
+      text: "text-emerald-300",
+      pillBorder: "border-emerald-500/30",
+      pillBg: "bg-emerald-500/10",
+    },
+    violet: {
+      dot: "bg-violet-400",
+      ring: "ring-violet-400/20",
+      text: "text-violet-300",
+      pillBorder: "border-violet-500/30",
+      pillBg: "bg-violet-500/10",
+    },
+    zinc: {
+      dot: "bg-zinc-400",
+      ring: "ring-zinc-400/20",
+      text: "text-zinc-300",
+      pillBorder: "border-white/10",
+      pillBg: "bg-white/5",
+    },
+    future: {
+      dot: "bg-transparent border border-dashed border-zinc-600",
+      ring: "ring-transparent",
+      text: "text-zinc-400",
+      pillBorder: "border-white/10",
+      pillBg: "bg-white/[0.03]",
+    },
+  };
+
+  return (
+    <Section id="changelog" className="py-16 md:py-20">
+      <Reveal>
+        <Eyebrow>
+          <GitBranch className="h-3.5 w-3.5 text-violet-300" /> Changelog
+        </Eyebrow>
+        <h2 className="text-3xl font-bold tracking-tight text-white md:text-4xl">
+          What&apos;s <GradientText>new</GradientText>.
+        </h2>
+      </Reveal>
+
+      <Reveal delay={0.05}>
+        <ol className="mt-10">
+          {entries.map((e, i) => {
+            const tone = toneMap[e.tone];
+            return (
+              <li
+                key={e.version}
+                className="relative flex gap-5 pb-8 last:pb-0"
+              >
+                {/* Vertical connector line */}
+                {i < entries.length - 1 && (
+                  <span
+                    aria-hidden
+                    className="absolute left-[7px] top-5 bottom-0 w-px bg-gradient-to-b from-white/15 to-white/5"
+                  />
+                )}
+                {/* Dot */}
+                <span
+                  aria-hidden
+                  className={cn(
+                    "relative z-10 mt-1.5 flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full ring-4 ring-[#070710]",
+                    tone.dot,
+                    tone.ring
+                  )}
+                />
+                {/* Content */}
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span
+                      className={cn(
+                        "inline-flex items-center rounded-full border px-2 py-0.5 font-mono text-[11px] font-semibold",
+                        tone.pillBorder,
+                        tone.pillBg,
+                        tone.text
+                      )}
+                    >
+                      {e.version}
+                    </span>
+                    {e.latest && (
+                      <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-300">
+                        <Sparkles className="h-3 w-3" /> latest
+                      </span>
+                    )}
+                    <span className="text-[11px] text-zinc-500">{e.date}</span>
+                  </div>
+                  <p className="mt-1.5 text-sm text-zinc-300">{e.desc}</p>
+                </div>
+              </li>
+            );
+          })}
+        </ol>
       </Reveal>
     </Section>
   );
@@ -2489,11 +2981,14 @@ function Footer() {
 }
 
 /* ────────────────────────────────────────────────────────────────────────────
- * Page — final section order:
- * 1. Hero → 2. Stats strip → 3. Compatible with → 4. How it works (NEW)
- * → 5. Quickstart → 6. Playground (NEW) → 7. Tools table → 8. Analytics
- * → 9. Example prompts → 10. Safety → 11. Features → 12. FAQ (NEW)
- * → 13. Roadmap (NEW) → 14. Final CTA → 15. Footer
+ * Page — final section order (3-rev):
+ * 1. Hero → 2. Stats strip (count-up) → 3. Compatible with
+ * → 4. Compare (NEW) → 5. How it works (gradient connectors)
+ * → 6. Quickstart → 7. Playground (copy-response + history) → 8. Tools table
+ * → 9. Analytics → 10. Example prompts → 11. Safety → 12. Features
+ * → 13. FAQ (brighter chevrons) → 14. Changelog (NEW) → 15. Roadmap
+ * → 16. Final CTA → 17. Footer
+ * Plus a fixed ReadingProgressBar at the very top of the viewport.
  * ──────────────────────────────────────────────────────────────────────── */
 
 export default function Home() {
@@ -2502,11 +2997,13 @@ export default function Home() {
       {/* Page wrapper ensures the footer sticks to the bottom on short content. */}
       <div className="flex min-h-screen flex-col">
         <TooltipProvider delayDuration={200}>
+          <ReadingProgressBar />
           <Nav />
           <main className="flex-1">
             <Hero />
             <StatsStrip />
             <CompatibleWith />
+            <Compare />
             <HowItWorks />
             <Quickstart />
             <Playground />
@@ -2516,6 +3013,7 @@ export default function Home() {
             <Safety />
             <Features />
             <FAQ />
+            <Changelog />
             <Roadmap />
             <FinalCta />
           </main>
