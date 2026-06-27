@@ -206,7 +206,11 @@ function Reveal({
   className?: string;
   as?: "div" | "li" | "span";
 }) {
-  const reduce = useReducedMotion();
+  const [reduce, setReduce] = React.useState(false);
+  const fmReduce = useReducedMotion();
+  React.useEffect(() => {
+    setReduce(fmReduce ?? false);
+  }, [fmReduce]);
   const Comp = motion[as] as typeof motion.div;
   const variants: Variants = {
     hidden: { opacity: 0, y: reduce ? 0 : 24 },
@@ -425,7 +429,11 @@ function HeroTerminal() {
     ["Show me my MRR and which plan is growing fastest"],
     { typeMs: 32, holdMs: 9000 }
   );
-  const reduce = useReducedMotion();
+  const [reduce, setReduce] = React.useState(false);
+  const fmReduce = useReducedMotion();
+  React.useEffect(() => {
+    setReduce(fmReduce ?? false);
+  }, [fmReduce]);
 
   return (
     <div className="smcp-float relative">
@@ -683,7 +691,11 @@ function StatTile({
 }
 
 function StatsStrip() {
-  const reduce = useReducedMotion();
+  const [reduce, setReduce] = React.useState(false);
+  const fmReduce = useReducedMotion();
+  React.useEffect(() => {
+    setReduce(fmReduce ?? false);
+  }, [fmReduce]);
   const stats: Array<{
     icon: React.ComponentType<{ className?: string }>;
     label: string;
@@ -1482,7 +1494,11 @@ function Playground() {
   // into the response — no flash of stale content on hydration.
   const [loading, setLoading] = React.useState<boolean>(true);
   const [runToken, setRunToken] = React.useState<number>(0); // bumps to retrigger response fade
-  const reduce = useReducedMotion();
+  const [reduce, setReduce] = React.useState(false);
+  const fmReduce = useReducedMotion();
+  React.useEffect(() => {
+    setReduce(fmReduce ?? false);
+  }, [fmReduce]);
   const { copied, copy } = useCopyToClipboard();
 
   const active = PLAYGROUND_PROMPTS.find((p) => p.id === activeId) ?? PLAYGROUND_PROMPTS[0];
