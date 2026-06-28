@@ -31,8 +31,7 @@ export const metadata: Metadata = {
   authors: [{ name: "stripe-mcp contributors" }],
   icons: {
     icon: "/favicon.ico",
-    shortcut: "/favicon.ico",
-    apple: "/logo.png",
+    apple: "/icon.png",
   },
   openGraph: {
     title: "stripe-mcp — The most complete MCP server for Stripe",
