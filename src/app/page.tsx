@@ -1721,7 +1721,6 @@ function Playground() {
                 </div>
               )}
             </div>
-            </div>
 
             {/* Footer */}
             <div className="flex items-center justify-between gap-2 border-t border-white/10 bg-white/[0.02] px-4 py-2.5 text-[11px]">
