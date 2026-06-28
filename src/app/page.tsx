@@ -90,7 +90,7 @@ import {
  * ──────────────────────────────────────────────────────────────────────── */
 
 const GITHUB_URL = "https://github.com/guillaumeCode2012/stripe-mcp";
-const NPM_CMD = "npm install -g @guillaumecode2012/stripe-mcp";
+const NPM_CMD = "npm install -g @guillaume_code_2012/stripe-mcp";
 
 function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
@@ -1009,7 +1009,7 @@ function Quickstart() {
       n: "01",
       title: "Install",
       desc: "Globally install the stripe-mcp CLI.",
-      code: "npm install -g @guillaumecode2012/stripe-mcp",
+      code: "npm install -g @guillaume_code_2012/stripe-mcp",
       lang: "bash",
     },
     {
@@ -2973,7 +2973,7 @@ function Footer() {
               <li><a href="#faq" className="text-sm text-zinc-500 transition-colors hover:text-zinc-200">FAQ</a></li>
               <li><a href="#roadmap" className="text-sm text-zinc-500 transition-colors hover:text-zinc-200">Roadmap</a></li>
               <li><a href={GITHUB_URL} target="_blank" rel="noopener noreferrer" className="text-sm text-zinc-500 transition-colors hover:text-zinc-200">GitHub</a></li>
-              <li><a href="https://www.npmjs.com/package/@guillaumecode2012/stripe-mcp" target="_blank" rel="noopener noreferrer" className="text-sm text-zinc-500 transition-colors hover:text-zinc-200">npm</a></li>
+              <li><a href="https://www.npmjs.com/package/@guillaume_code_2012/stripe-mcp" target="_blank" rel="noopener noreferrer" className="text-sm text-zinc-500 transition-colors hover:text-zinc-200">npm</a></li>
               <li><a href="https://docs.stripe.com/" target="_blank" rel="noopener noreferrer" className="text-sm text-zinc-500 transition-colors hover:text-zinc-200">Stripe docs</a></li>
               <li><a href="https://modelcontextprotocol.io/" target="_blank" rel="noopener noreferrer" className="text-sm text-zinc-500 transition-colors hover:text-zinc-200">MCP spec</a></li>
             </ul>

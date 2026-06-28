@@ -25,7 +25,7 @@
 ## Why this exists
 
 - **No other Stripe MCP has analytics.** MRR, churn, revenue summaries, top customers, failed-payment reports — all computed client-side. Stripe has no native MRR endpoint; we implemented the canonical Baremetrics/ChartMogul methodology.
-- **One command to install.** `npm install -g @guillaumecode2012/stripe-mcp` and you're talking to Stripe from Claude in 30 seconds. No servers, no ports, no auth headers.
+- **One command to install.** `npm install -g @guillaume_code_2012/stripe-mcp` and you're talking to Stripe from Claude in 30 seconds. No servers, no ports, no auth headers.
 - **Typed end-to-end.** TypeScript strict mode, zod runtime validation on every input, zero `any`. Stripe SDK types flow all the way through.
 
 ---
@@ -35,7 +35,7 @@
 **1. Install**
 
 ```bash
-npm install -g @guillaumecode2012/stripe-mcp
+npm install -g @guillaume_code_2012/stripe-mcp
 ```
 
 **2. Get a Stripe secret key**
