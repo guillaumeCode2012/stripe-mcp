@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { motion, AnimatePresence, useReducedMotion, useInView, type Variants } from "framer-motion";
+import { motion, useReducedMotion, useInView, type Variants } from "framer-motion";
 import {
   Zap,
   Search,
@@ -463,12 +463,8 @@ function HeroTerminal() {
           </div>
 
           {/* Assistant response — appears after typing finishes */}
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={done ? { opacity: 1, y: 0 } : { opacity: 0, y: 8 }}
-            transition={{ duration: 0.4 }}
-            layout={false}
-            className="flex items-start gap-2.5"
+          <div
+            className={`flex items-start gap-2.5 transition-all duration-400 ${done ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}`}
           >
             <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-emerald-500 text-white">
               <Sparkles className="h-3 w-3" />
@@ -518,7 +514,7 @@ function HeroTerminal() {
                 <span className="ml-auto font-mono text-[10px] text-zinc-500">top: cus_AcmeCorp</span>
               </div>
             </div>
-          </motion.div>
+          </div>
         </div>
       </div>
     </div>
@@ -1707,34 +1703,23 @@ function Playground() {
 
             {/* Body */}
             <div className="min-h-[420px] flex-1 overflow-y-auto p-4 smcp-scrollbar">
-              <AnimatePresence mode="wait">
-                {loading ? (
-                  <motion.div
-                    key={`loading-${runToken}-${activeId}`}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    layout={false}
-                    className="flex h-full flex-col items-center justify-center gap-3 py-16 text-center"
-                  >
-                    <Loader2 className="h-8 w-8 animate-spin text-violet-300" />
-                    <p className="text-sm text-zinc-300">stripe-mcp is thinking…</p>
-                    <p className="text-[11px] text-zinc-500">calling {active.tool.split(" ")[0]}…</p>
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key={`response-${runToken}-${activeId}`}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -8 }}
-                    transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                    layout={false}
-                  >
-                    {active.render()}
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              {loading ? (
+                <div
+                  key={`loading-${runToken}-${activeId}`}
+                  className="flex h-full flex-col items-center justify-center gap-3 py-16 text-center animate-in fade-in duration-200"
+                >
+                  <Loader2 className="h-8 w-8 animate-spin text-violet-300" />
+                  <p className="text-sm text-zinc-300">stripe-mcp is thinking…</p>
+                  <p className="text-[11px] text-zinc-500">calling {active.tool.split(" ")[0]}…</p>
+                </div>
+              ) : (
+                <div
+                  key={`response-${runToken}-${activeId}`}
+                  className="animate-in fade-in slide-in-from-bottom-2 duration-400"
+                >
+                  {active.render()}
+                </div>
+              )}
             </div>
             </div>
 
