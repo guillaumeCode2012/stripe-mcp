@@ -1,4 +1,4 @@
-import type { ToolDefinition } from '../types/index.js';
+﻿import type { ToolDefinition } from '../types/index.js';
 
 import { tools as customersTools } from './customers/index.js';
 import { tools as productsTools } from './products/index.js';
@@ -21,7 +21,7 @@ import { tools as metersTools } from './meters/index.js';
 import { tools as analyticsTools } from './analytics/index.js';
 
 /**
- * The complete catalogue of stripe-mcp tools, in registration order.
+ * The complete catalogue of StripeFlow tools, in registration order.
  * Categories are grouped logically: core resources first, analytics last.
  */
 export const allTools: ToolDefinition[] = [

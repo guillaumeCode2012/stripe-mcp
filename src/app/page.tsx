@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import { motion, useReducedMotion, useInView, type Variants } from "framer-motion";
@@ -83,14 +83,14 @@ import {
   categories,
   categoryColors,
   type StripeMcpTool,
-} from "@/lib/stripe-mcp-tools";
+} from "@/lib/stripeflow-tools";
 
 /* ────────────────────────────────────────────────────────────────────────────
  * Shared primitives
  * ──────────────────────────────────────────────────────────────────────── */
 
-const GITHUB_URL = "https://github.com/guillaumeCode2012/stripe-mcp";
-const NPM_CMD = "npm install -g @guillaume_code_2012/stripe-mcp";
+const GITHUB_URL = "https://github.com/guillaumeCode2012/stripeflow";
+const NPM_CMD = "npm install -g @guillaume_code_2012/stripeflow";
 
 function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
@@ -334,10 +334,10 @@ function Nav() {
       )}
     >
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8" aria-label="Primary">
-        <a href="#top" className="flex items-center gap-2.5" aria-label="stripe-mcp home">
+        <a href="#top" className="flex items-center gap-2.5" aria-label="StripeFlow home">
           <LogoMark className="h-8 w-8" />
           <span className="font-mono text-base font-semibold tracking-tight text-zinc-100">
-            stripe-mcp
+            StripeFlow
           </span>
         </a>
 
@@ -753,7 +753,7 @@ function CompatibleWith() {
 }
 
 /* ────────────────────────────────────────────────────────────────────────────
- * 4b. Compare — why stripe-mcp? (NEW in 3-rev)
+ * 4b. Compare — why StripeFlow? (NEW in 3-rev)
  * ──────────────────────────────────────────────────────────────────────── */
 
 type CompareCell =
@@ -808,10 +808,10 @@ function Compare() {
     <Section id="compare">
       <Reveal>
         <Eyebrow>
-          <Sparkles className="h-3.5 w-3.5 text-violet-300" /> Why stripe-mcp?
+          <Sparkles className="h-3.5 w-3.5 text-violet-300" /> Why StripeFlow?
         </Eyebrow>
         <h2 className="text-3xl font-bold tracking-tight text-white md:text-5xl">
-          Why <GradientText>stripe-mcp</GradientText>?
+          Why <GradientText>StripeFlow</GradientText>?
         </h2>
         <p className="mt-4 max-w-2xl text-zinc-400">
           The only Stripe MCP with real analytics. Built for production.
@@ -829,7 +829,7 @@ function Compare() {
                   <th className="border-x border-white/10 bg-gradient-to-br from-violet-500/20 to-emerald-500/20 px-4 py-3.5 font-semibold text-white">
                     <div className="flex items-center gap-2">
                       <LogoMark className="h-5 w-5" />
-                      stripe-mcp
+                      StripeFlow
                     </div>
                   </th>
                   <th className="bg-white/[0.02] px-4 py-3.5 font-medium">Other Stripe MCPs</th>
@@ -902,7 +902,7 @@ function HowItWorks() {
     },
     {
       icon: Zap,
-      title: "stripe-mcp",
+      title: "StripeFlow",
       desc: "A local Node process exposing all 79 typed tools.",
     },
     {
@@ -988,7 +988,7 @@ function HowItWorks() {
 const CLAUDE_CONFIG_JSON = `{
   "mcpServers": {
     "stripe": {
-      "command": "stripe-mcp",
+      "command": "stripeflow",
       "env": { "STRIPE_SECRET_KEY": "sk_test_..." }
     }
   }
@@ -999,8 +999,8 @@ function Quickstart() {
     {
       n: "01",
       title: "Install",
-      desc: "Globally install the stripe-mcp CLI.",
-      code: "npm install -g @guillaume_code_2012/stripe-mcp",
+      desc: "Globally install the StripeFlow CLI.",
+      code: "npm install -g @guillaume_code_2012/stripeflow",
       lang: "bash",
     },
     {
@@ -1072,7 +1072,7 @@ function Quickstart() {
 {`{
   "mcpServers": {
     "stripe": {
-      "command": "stripe-mcp",
+      "command": "stripeflow",
       "env": { "STRIPE_SECRET_KEY": "sk_test_..." }
     }
   }
@@ -1519,7 +1519,7 @@ function Playground() {
   // `runToken` (Run button click) are deps so either interaction retriggers
   // the loading→response cycle. Without `runToken` in the dep array, hitting
   // Run would set loading=true with nothing to clear it, leaving the demo
-  // stuck on "stripe-mcp is thinking…".
+  // stuck on "StripeFlow is thinking…".
   React.useEffect(() => {
     setLoading(true);
     const t = setTimeout(() => setLoading(false), 600);
@@ -1527,7 +1527,7 @@ function Playground() {
   }, [activeId, runToken]);
 
   // Text summary copied by the "Copy response" button.
-  const responseText = `stripe-mcp · ${active.tool}\nPrompt: "${active.prompt}"\nLatency: ${active.ms}ms (simulated)`;
+  const responseText = `StripeFlow · ${active.tool}\nPrompt: "${active.prompt}"\nLatency: ${active.ms}ms (simulated)`;
 
   return (
     <Section id="playground">
@@ -1539,7 +1539,7 @@ function Playground() {
           Try it. <GradientText>Right here.</GradientText>
         </h2>
         <p className="mt-4 max-w-2xl text-zinc-400">
-          Pick a prompt and watch stripe-mcp respond — no setup required.
+          Pick a prompt and watch StripeFlow respond — no setup required.
         </p>
       </Reveal>
 
@@ -1652,11 +1652,11 @@ function Playground() {
             >
               {loading ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin" /> stripe-mcp is thinking…
+                  <Loader2 className="h-4 w-4 animate-spin" /> StripeFlow is thinking…
                 </>
               ) : (
                 <>
-                  <Play className="h-4 w-4" fill="currentColor" /> Run with stripe-mcp
+                  <Play className="h-4 w-4" fill="currentColor" /> Run with StripeFlow
                 </>
               )}
             </Button>
@@ -1675,7 +1675,7 @@ function Playground() {
               <span className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-emerald-500 text-white">
                 <Sparkles className="h-3 w-3" />
               </span>
-              <span className="text-xs font-medium text-zinc-200">stripe-mcp</span>
+              <span className="text-xs font-medium text-zinc-200">StripeFlow</span>
               <span className="text-[10px] text-zinc-500">• assistant</span>
               <span className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-300">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> ready
@@ -1709,7 +1709,7 @@ function Playground() {
                   className="flex h-full flex-col items-center justify-center gap-3 py-16 text-center animate-in fade-in duration-200"
                 >
                   <Loader2 className="h-8 w-8 animate-spin text-violet-300" />
-                  <p className="text-sm text-zinc-300">stripe-mcp is thinking…</p>
+                  <p className="text-sm text-zinc-300">StripeFlow is thinking…</p>
                   <p className="text-[11px] text-zinc-500">calling {active.tool.split(" ")[0]}…</p>
                 </div>
               ) : (
@@ -2268,7 +2268,7 @@ function ExamplePrompts() {
           Prompts your AI assistant <GradientText>actually understands</GradientText>.
         </h2>
         <p className="mt-4 max-w-2xl text-zinc-400">
-          stripe-mcp exposes rich, typed tools — so the model picks the right one, fills the right
+          StripeFlow exposes rich, typed tools — so the model picks the right one, fills the right
           params, and shows you what it did.
         </p>
       </Reveal>
@@ -2414,7 +2414,7 @@ function Safety() {
               <div>
                 <h3 className="text-base font-semibold text-white">Live mode is loud.</h3>
                 <p className="mt-1 max-w-xl text-sm text-zinc-400">
-                  stripe-mcp detects your key prefix — <MonoPill>sk_test_</MonoPill> (safe) vs{" "}
+                  StripeFlow detects your key prefix — <MonoPill>sk_test_</MonoPill> (safe) vs{" "}
                   <MonoPill className="border-amber-500/30 bg-amber-500/10 text-amber-200">sk_live_</MonoPill>{" "}
                   (real money). A warning prints on startup in live mode so you always know which
                   mode you&apos;re in.
@@ -2424,7 +2424,7 @@ function Safety() {
 
             {/* Mock startup banner */}
             <pre className="min-w-[20rem] overflow-x-auto rounded-lg border border-white/10 bg-black/50 p-3 font-mono text-[11px] leading-relaxed smcp-scrollbar">
-{`⚡ stripe-mcp v1.0.0 starting…
+{`⚡ StripeFlow v1.0.0 starting…
 ✓ 79 tools registered
 ✓ stdio transport ready
 
@@ -2452,7 +2452,7 @@ function Features() {
     { icon: CircleDollarSign, title: "Formatted money", desc: "Cents plus “$12.50” in every response." },
     { icon: Type, title: "Dual date formats", desc: "Unix timestamps + ISO strings, always." },
     { icon: Bug, title: "Mocked tests", desc: "No Stripe account needed to run the suite." },
-    { icon: Rocket, title: "1-command install", desc: "`npm i -g stripe-mcp` and you're done." },
+    { icon: Rocket, title: "1-command install", desc: "`npm i -g StripeFlow` and you're done." },
   ];
   return (
     <Section id="features">
@@ -2491,7 +2491,7 @@ function Features() {
 
 const FAQ_ITEMS: { q: string; a: React.ReactNode }[] = [
   {
-    q: "Is stripe-mcp safe to use?",
+    q: "Is StripeFlow safe to use?",
     a: (
       <>
         Yes. It runs entirely locally over stdio. Your Stripe secret key is read from your environment and sent directly to Stripe&apos;s API — it never touches our servers or the AI model provider. We recommend starting with a test key (<MonoPill>sk_test_…</MonoPill>).
@@ -2502,7 +2502,7 @@ const FAQ_ITEMS: { q: string; a: React.ReactNode }[] = [
     q: "Does it work in live mode?",
     a: (
       <>
-        Yes. If your key starts with <MonoPill className="border-amber-500/30 bg-amber-500/10 text-amber-200">sk_live_</MonoPill>, stripe-mcp prints a ⚠️ LIVE MODE warning on startup. All destructive operations work in both modes.
+        Yes. If your key starts with <MonoPill className="border-amber-500/30 bg-amber-500/10 text-amber-200">sk_live_</MonoPill>, StripeFlow prints a ⚠️ LIVE MODE warning on startup. All destructive operations work in both modes.
       </>
     ),
   },
@@ -2518,7 +2518,7 @@ const FAQ_ITEMS: { q: string; a: React.ReactNode }[] = [
     q: "Do I need to run a server?",
     a: (
       <>
-        No. stripe-mcp communicates over stdio. No HTTP server, no port, no auth. The MCP client spawns it as a child process.
+        No. StripeFlow communicates over stdio. No HTTP server, no port, no auth. The MCP client spawns it as a child process.
       </>
     ),
   },
@@ -2526,7 +2526,7 @@ const FAQ_ITEMS: { q: string; a: React.ReactNode }[] = [
     q: "How are the analytics tools different?",
     a: (
       <>
-        Stripe has no native MRR/churn endpoint. stripe-mcp paginates your data and computes MRR, churn, revenue summaries, top customers, and failed-payment reports client-side — matching Baremetrics/ChartMogul methodology. <span className="font-semibold text-zinc-200">No other Stripe MCP ships these.</span>
+        Stripe has no native MRR/churn endpoint. StripeFlow paginates your data and computes MRR, churn, revenue summaries, top customers, and failed-payment reports client-side — matching Baremetrics/ChartMogul methodology. <span className="font-semibold text-zinc-200">No other Stripe MCP ships these.</span>
       </>
     ),
   },
@@ -2567,7 +2567,7 @@ function FAQ() {
           Frequently asked <GradientText>questions</GradientText>.
         </h2>
         <p className="mt-4 max-w-2xl text-zinc-400">
-          Everything you might want to know before running stripe-mcp against your account.
+          Everything you might want to know before running StripeFlow against your account.
         </p>
       </Reveal>
 
@@ -2912,9 +2912,9 @@ function Footer() {
         <div className="grid gap-10 md:grid-cols-4">
           {/* Brand */}
           <div className="md:col-span-1">
-            <a href="#top" className="flex items-center gap-2.5" aria-label="stripe-mcp home">
+            <a href="#top" className="flex items-center gap-2.5" aria-label="StripeFlow home">
               <LogoMark className="h-8 w-8" />
-              <span className="font-mono text-base font-semibold text-zinc-100">stripe-mcp</span>
+              <span className="font-mono text-base font-semibold text-zinc-100">StripeFlow</span>
             </a>
             <p className="mt-3 text-sm text-zinc-500">
               The most complete open-source MCP server for Stripe. 79 tools, one command.
@@ -2952,7 +2952,7 @@ function Footer() {
               <li><a href="#faq" className="text-sm text-zinc-500 transition-colors hover:text-zinc-200">FAQ</a></li>
               <li><a href="#roadmap" className="text-sm text-zinc-500 transition-colors hover:text-zinc-200">Roadmap</a></li>
               <li><a href={GITHUB_URL} target="_blank" rel="noopener noreferrer" className="text-sm text-zinc-500 transition-colors hover:text-zinc-200">GitHub</a></li>
-              <li><a href="https://www.npmjs.com/package/@guillaume_code_2012/stripe-mcp" target="_blank" rel="noopener noreferrer" className="text-sm text-zinc-500 transition-colors hover:text-zinc-200">npm</a></li>
+              <li><a href="https://www.npmjs.com/package/@guillaume_code_2012/stripeflow" target="_blank" rel="noopener noreferrer" className="text-sm text-zinc-500 transition-colors hover:text-zinc-200">npm</a></li>
               <li><a href="https://docs.stripe.com/" target="_blank" rel="noopener noreferrer" className="text-sm text-zinc-500 transition-colors hover:text-zinc-200">Stripe docs</a></li>
               <li><a href="https://modelcontextprotocol.io/" target="_blank" rel="noopener noreferrer" className="text-sm text-zinc-500 transition-colors hover:text-zinc-200">MCP spec</a></li>
             </ul>
@@ -2976,7 +2976,7 @@ function Footer() {
           </p>
           <div className="flex items-center gap-1.5 text-xs text-zinc-500">
             <Zap className="h-3.5 w-3.5 text-violet-400" fill="currentColor" />
-            <span className="font-mono">stripe-mcp</span>
+            <span className="font-mono">StripeFlow</span>
           </div>
         </div>
       </div>

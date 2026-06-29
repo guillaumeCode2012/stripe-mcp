@@ -52,8 +52,8 @@ ENTRYPOINT ["node", "dist/index.js"]
 HEALTHCHECK --interval=5m --timeout=10s --start-period=5s --retries=3 \
   CMD node dist/index.js --list-tools >/dev/null || exit 1
 
-LABEL org.opencontainers.image.title="stripe-mcp" \
-      org.opencontainers.image.description="The most complete MCP server for Stripe" \
-      org.opencontainers.image.source="https://github.com/guillaumeCode2012/stripe-mcp" \
+LABEL org.opencontainers.image.title="stripeflow" \
+      org.opencontainers.image.description="StripeFlow — the most complete MCP server for Stripe" \
+      org.opencontainers.image.source="https://github.com/guillaumeCode2012/stripeflow" \
       org.opencontainers.image.licenses="MIT" \
       org.opencontainers.image.version="1.0.0"

@@ -1,4 +1,4 @@
-```
+﻿```
  ⚡
  ███████ ███████ ███████ ███████ ███████ ███████ ███████ ███████████
 ░███░░░ ░███░░░ ░███░░░ ░███░░░ ░███░░░ ░███░░░ ░███░░░ ░░░░░███░░░░
@@ -10,16 +10,16 @@
 ░░░░░░░ ░░░░░░ ░░░░░░░ ░░░░░░░ ░░░     ░░░     ░░░░░░      ░░░
 ```
 
-# stripe-mcp
+# StripeFlow
 
 > **The most complete open-source MCP server for Stripe.**
 
-![npm version](https://img.shields.io/npm/v/@guillaume_code_2012/stripe-mcp?color=blue)
+![npm version](https://img.shields.io/npm/v/@guillaume_code_2012/stripeflow?color=blue)
 ![MIT license](https://img.shields.io/badge/license-MIT-green)
 ![MCP Compatible](https://img.shields.io/badge/MCP-compatible-purple)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)
-![Build Status](https://img.shields.io/github/actions/workflow/status/guillaumeCode2012/stripe-mcp/ci.yml?branch=main&label=CI)
-![Stars](https://img.shields.io/github/stars/guillaumeCode2012/stripe-mcp?style=social)
+![Build Status](https://img.shields.io/github/actions/workflow/status/guillaumeCode2012/stripeflow/ci.yml?branch=main&label=CI)
+![Stars](https://img.shields.io/github/stars/guillaumeCode2012/stripeflow?style=social)
 
 **Manage your entire Stripe account — customers, subscriptions, invoices, and analytics — with natural language. 79 tools. One command. Works with Claude Desktop, Cursor, and Windsurf.**
 
@@ -28,7 +28,7 @@
 ## Why this exists
 
 - **No other Stripe MCP has analytics.** MRR, churn, revenue summaries, top customers, failed-payment reports — all computed client-side. Stripe has no native MRR endpoint; we implemented the canonical Baremetrics/ChartMogul methodology.
-- **One command to install.** `npm install -g @guillaume_code_2012/stripe-mcp` and you're talking to Stripe from Claude in 30 seconds. No servers, no ports, no auth headers.
+- **One command to install.** `npm install -g @guillaume_code_2012/stripeflow` and you're talking to Stripe from Claude in 30 seconds. No servers, no ports, no auth headers.
 - **Typed end-to-end.** TypeScript strict mode, zod runtime validation on every input, zero `any`. Stripe SDK types flow all the way through to the LLM.
 
 ## Quick start
@@ -36,7 +36,7 @@
 **1. Install**
 
 ```bash
-npm install -g @guillaume_code_2012/stripe-mcp
+npm install -g @guillaume_code_2012/stripeflow
 ```
 
 **2. Get a Stripe secret key**
@@ -56,7 +56,7 @@ export STRIPE_SECRET_KEY=sk_test_...
 {
   "mcpServers": {
     "stripe": {
-      "command": "stripe-mcp",
+      "command": "stripeflow",
       "env": { "STRIPE_SECRET_KEY": "sk_test_..." }
     }
   }
@@ -69,7 +69,7 @@ export STRIPE_SECRET_KEY=sk_test_...
 {
   "mcpServers": {
     "stripe": {
-      "command": "stripe-mcp",
+      "command": "stripeflow",
       "env": { "STRIPE_SECRET_KEY": "sk_test_..." }
     }
   }
@@ -78,7 +78,7 @@ export STRIPE_SECRET_KEY=sk_test_...
 
 **Windsurf** — `Settings → MCP Servers → Add Server`, same JSON shape.
 
-Restart your client. You should see `stripe-mcp` log `✓ Test mode (no real charges).` and you're live.
+Restart your client. You should see `StripeFlow` log `✓ Test mode (no real charges).` and you're live.
 
 ## Compatible with
 
@@ -334,7 +334,7 @@ Curated power-user prompts. Drop these into Claude/Cursor/Windsurf and watch the
 
 ### Test vs live mode
 
-stripe-mcp detects your key prefix at startup and warns you clearly:
+StripeFlow detects your key prefix at startup and warns you clearly:
 
 ```
 ⚠️  LIVE MODE — real money affected. Proceed with caution.
@@ -347,7 +347,7 @@ or
 ```
 
 - **`sk_test_...`** → test mode. No real charges, no real customers, no real money. Recommended for first runs.
-- **`sk_live_...`** → live mode. Real money. stripe-mcp logs a loud warning on startup.
+- **`sk_live_...`** → live mode. Real money. StripeFlow logs a loud warning on startup.
 
 **Start with a test key.** Don't wire a live key into Claude Desktop until you've poked around test mode for an afternoon.
 
@@ -390,8 +390,8 @@ See [`DECISIONS.md`](./DECISIONS.md) for the why behind each of these.
 ## Development
 
 ```bash
-git clone https://github.com/guillaumeCode2012/stripe-mcp.git
-cd stripe-mcp
+git clone https://github.com/guillaumeCode2012/stripeflow.git
+cd StripeFlow
 npm install
 npm run build
 npm test
@@ -419,7 +419,7 @@ code style rules, and PR checklist.
 
 ## License
 
-MIT © stripe-mcp contributors. See [`LICENSE`](./LICENSE).
+MIT © StripeFlow contributors. See [`LICENSE`](./LICENSE).
 
 ## Acknowledgements
 

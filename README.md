@@ -1,4 +1,4 @@
-```
+﻿```
   ⚡
   ███████ ███████ ███████ ███████ ███████ ███████ ███████ ███████████
  ░███░░░ ░███░░░ ░███░░░ ░███░░░ ░███░░░ ░███░░░ ░███░░░ ░░░░░███░░░░
@@ -10,22 +10,22 @@
  ░░░░░░░ ░░░░░░ ░░░░░░░ ░░░░░░░ ░░░     ░░░     ░░░░░░      ░░░
 ```
 
-# stripe-mcp
+# StripeFlow
 
 > **The most complete open-source MCP server for Stripe.** 79 tools. 19 categories. One command.
 
-[![CI](https://img.shields.io/github/actions/workflow/status/guillaumeCode2012/stripe-mcp/ci.yml?branch=main&label=CI)](https://github.com/guillaumeCode2012/stripe-mcp/actions)
-[![MIT license](https://img.shields.io/badge/license-MIT-green)](./stripe-mcp/LICENSE)
+[![CI](https://img.shields.io/github/actions/workflow/status/guillaumeCode2012/stripeflow/ci.yml?branch=main&label=CI)](https://github.com/guillaumeCode2012/stripeflow/actions)
+[![MIT license](https://img.shields.io/badge/license-MIT-green)](./stripeflow/LICENSE)
 [![MCP Compatible](https://img.shields.io/badge/MCP-compatible-purple)](https://modelcontextprotocol.io)
-[![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)](./stripe-mcp/tsconfig.json)
-[![Stars](https://img.shields.io/github/stars/guillaumeCode2012/stripe-mcp?style=social)](https://github.com/guillaumeCode2012/stripe-mcp)
+[![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)](./stripeflow/tsconfig.json)
+[![Stars](https://img.shields.io/github/stars/guillaumeCode2012/stripeflow?style=social)](https://github.com/guillaumeCode2012/stripeflow)
 
 ---
 
 ## Why this exists
 
 - **No other Stripe MCP has analytics.** MRR, churn, revenue summaries, top customers, failed-payment reports — all computed client-side. Stripe has no native MRR endpoint; we implemented the canonical Baremetrics/ChartMogul methodology.
-- **One command to install.** `npm install -g @guillaume_code_2012/stripe-mcp` and you're talking to Stripe from Claude in 30 seconds. No servers, no ports, no auth headers.
+- **One command to install.** `npm install -g @guillaume_code_2012/stripeflow` and you're talking to Stripe from Claude in 30 seconds. No servers, no ports, no auth headers.
 - **Typed end-to-end.** TypeScript strict mode, zod runtime validation on every input, zero `any`. Stripe SDK types flow all the way through.
 
 ---
@@ -35,12 +35,12 @@
 **1. Install**
 
 ```bash
-npm install -g @guillaume_code_2012/stripe-mcp
+npm install -g @guillaume_code_2012/stripeflow
 ```
 
 > **Windows users:** if you get a PowerShell script error, use **CMD** instead:
 > ```cmd
-> cmd /c "npm install -g @guillaume_code_2012/stripe-mcp"
+> cmd /c "npm install -g @guillaume_code_2012/stripeflow"
 > ```
 
 **2. Get a Stripe secret key**
@@ -59,7 +59,7 @@ export STRIPE_SECRET_KEY=sk_test_...
 {
   "mcpServers": {
     "stripe": {
-      "command": "stripe-mcp",
+      "command": "stripeflow",
       "env": { "STRIPE_SECRET_KEY": "sk_test_..." }
     }
   }
@@ -72,7 +72,7 @@ export STRIPE_SECRET_KEY=sk_test_...
 {
   "mcpServers": {
     "stripe": {
-      "command": "stripe-mcp",
+      "command": "stripeflow",
       "env": { "STRIPE_SECRET_KEY": "sk_test_..." }
     }
   }
@@ -85,7 +85,7 @@ export STRIPE_SECRET_KEY=sk_test_...
 {
   "mcpServers": {
     "stripe": {
-      "command": "stripe-mcp",
+      "command": "stripeflow",
       "env": { "STRIPE_SECRET_KEY": "sk_test_..." }
     }
   }
@@ -121,7 +121,7 @@ export STRIPE_SECRET_KEY=sk_test_...
 
 ### Analytics (the crown jewel)
 
-Stripe has no native MRR endpoint. stripe-mcp computes MRR, churn, revenue, top customers, and failed-payment reports entirely client-side by paginating Stripe resources — the same methodology used by Baremetrics and ChartMogul.
+Stripe has no native MRR endpoint. StripeFlow computes MRR, churn, revenue, top customers, and failed-payment reports entirely client-side by paginating Stripe resources — the same methodology used by Baremetrics and ChartMogul.
 
 ---
 
@@ -156,7 +156,7 @@ Create a 20% off coupon valid for 3 months, then list all active coupons
 ## Architecture
 
 ```
-stripe-mcp/
+stripeflow/
 ├── src/
 │   ├── index.ts          # Entry point — StdioServerTransport
 │   ├── server.ts         # createServer() — registers all 79 tools
@@ -171,7 +171,7 @@ stripe-mcp/
 └── docs/                 # Per-category tool documentation
 ```
 
-**Key design decisions** ([DECISIONS.md](./stripe-mcp/DECISIONS.md)):
+**Key design decisions** ([DECISIONS.md](./stripeflow/DECISIONS.md)):
 
 - **Stdio only** — no HTTP, no ports, no auth headers. Spawned as a child process by your MCP client.
 - **Zod everywhere** — every input runtime-validated. JSON Schemas mirrored for MCP protocol.
@@ -184,8 +184,8 @@ stripe-mcp/
 ## Development
 
 ```bash
-git clone https://github.com/guillaumeCode2012/stripe-mcp.git
-cd stripe-mcp/stripe-mcp
+git clone https://github.com/guillaumeCode2012/stripeflow.git
+cd stripeflow/StripeFlow
 npm ci
 ```
 
@@ -204,7 +204,7 @@ npm ci
 4. `npm test` → all 83 pass
 5. `node dist/index.js --list-tools` → no errors
 
-See [CONTRIBUTING.md](./stripe-mcp/CONTRIBUTING.md) for the guide on adding new tools.
+See [CONTRIBUTING.md](./stripeflow/CONTRIBUTING.md) for the guide on adding new tools.
 
 ---
 
@@ -220,11 +220,11 @@ See [CONTRIBUTING.md](./stripe-mcp/CONTRIBUTING.md) for the guide on adding new 
 ## Docker
 
 ```bash
-docker build -t stripe-mcp:1.0.0 ./stripe-mcp
-docker run --rm -i -e STRIPE_SECRET_KEY=sk_test_... stripe-mcp:1.0.0
+docker build -t StripeFlow:1.0.0 ./StripeFlow
+docker run --rm -i -e STRIPE_SECRET_KEY=sk_test_... StripeFlow:1.0.0
 ```
 
-See [Dockerfile](./stripe-mcp/Dockerfile) and [docker-compose.yml](./stripe-mcp/docker-compose.yml).
+See [Dockerfile](./stripeflow/Dockerfile) and [docker-compose.yml](./stripeflow/docker-compose.yml).
 
 ---
 
@@ -249,4 +249,4 @@ See [Dockerfile](./stripe-mcp/Dockerfile) and [docker-compose.yml](./stripe-mcp/
 
 ## License
 
-MIT — see [LICENSE](./stripe-mcp/LICENSE).
+MIT — see [LICENSE](./stripeflow/LICENSE).

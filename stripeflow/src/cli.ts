@@ -1,9 +1,9 @@
-import { allTools, TOOL_COUNT } from './tools/index.js';
+﻿import { allTools, TOOL_COUNT } from './tools/index.js';
 import { config } from './config.js';
 import { runDoctor } from './doctor.js';
 
 /**
- * Lightweight CLI argument handling for stripe-mcp.
+ * Lightweight CLI argument handling for StripeFlow.
  *
  * Supported flags:
  *   -h, --help          Print usage and exit.
@@ -43,7 +43,7 @@ export async function handleCliArgs(argv: string[]): Promise<boolean> {
   }
 
   if (has('--version', '-v')) {
-    process.stderr.write(`stripe-mcp ${VERSION}\n`);
+    process.stderr.write(`StripeFlow ${VERSION}\n`);
     return true;
   }
 
@@ -82,8 +82,8 @@ export async function handleCliArgs(argv: string[]): Promise<boolean> {
   }
 
   // Unknown flag — warn on stderr but don't crash; fall through to server.
-  process.stderr.write(`stripe-mcp: unknown argument(s): ${args.join(' ')}\n`);
-  process.stderr.write(`Run 'stripe-mcp --help' for usage.\n`);
+  process.stderr.write(`StripeFlow: unknown argument(s): ${args.join(' ')}\n`);
+  process.stderr.write(`Run 'StripeFlow --help' for usage.\n`);
   return false;
 }
 
@@ -117,11 +117,11 @@ const KNOWN_CATEGORIES = [
   'tax',
 ].sort((a, b) => b.length - a.length);
 
-const HELP_TEXT = `stripe-mcp ${VERSION} — The most complete MCP server for Stripe.
+const HELP_TEXT = `StripeFlow ${VERSION} — The most complete MCP server for Stripe.
 
 USAGE
-  stripe-mcp                  Run the MCP server over stdio (default).
-  stripe-mcp <flag>           Run a CLI command instead of the server.
+  stripeflow                  Run the MCP server over stdio (default).
+  stripeflow <flag>           Run a CLI command instead of the server.
 
 FLAGS
   -h, --help                  Show this help message and exit.
@@ -143,7 +143,7 @@ CONFIGURATION
   {
     "mcpServers": {
       "stripe": {
-        "command": "stripe-mcp",
+        "command": "stripeflow",
         "env": { "STRIPE_SECRET_KEY": "sk_test_..." }
       }
     }
@@ -153,9 +153,9 @@ MODE
   Current key prefix: ${config.stripeMode === 'live' ? 'sk_live_ (LIVE — real money)' : 'sk_test_ (test — safe)'}
 
 DOCS
-  README    https://github.com/guillaumeCode2012/stripe-mcp#readme
+  README    https://github.com/guillaumeCode2012/stripeflow#readme
   Stripe    https://stripe.com/docs/api
   MCP       https://modelcontextprotocol.io
 
-stripe-mcp is MIT licensed.
+StripeFlow is MIT licensed.
 `;

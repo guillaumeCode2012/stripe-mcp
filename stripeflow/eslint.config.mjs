@@ -1,4 +1,4 @@
-// Flat config for stripe-mcp (ESLint 9 + typescript-eslint 8).
+﻿// Flat config for StripeFlow (ESLint 9 + typescript-eslint 8).
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(

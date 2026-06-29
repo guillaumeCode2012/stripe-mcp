@@ -1,4 +1,4 @@
-import type Stripe from 'stripe';
+﻿import type Stripe from 'stripe';
 import { getStripeClient, config, resetStripeClient } from './config.js';
 import { allTools, TOOL_COUNT } from './tools/index.js';
 import { formatStripeError } from './utils/format-stripe-error.js';
@@ -19,7 +19,7 @@ function line(text: string): void {
 }
 
 /**
- * Run a full health check of the stripe-mcp install and the configured Stripe
+ * Run a full health check of the StripeFlow install and the configured Stripe
  * account. Prints a friendly report to stderr and returns a boolean
  * "all checks passed" so the caller can set the exit code.
  *
@@ -33,7 +33,7 @@ function line(text: string): void {
  * The doctor never throws — every check is wrapped and produces a CheckResult.
  */
 export async function runDoctor(): Promise<boolean> {
-  const banner = `stripe-mcp doctor ${VERSION} — health check\n${'─'.repeat(56)}`;
+  const banner = `StripeFlow doctor ${VERSION} — health check\n${'─'.repeat(56)}`;
   line(banner);
   line('');
 
@@ -73,8 +73,8 @@ export async function runDoctor(): Promise<boolean> {
   line('');
   const allOk = checks.every((c) => c.ok);
   if (allOk) {
-    line('\x1b[32m✓ All checks passed.\x1b[0m stripe-mcp is ready to run.');
-    line('   Start the server:  stripe-mcp');
+    line('\x1b[32m✓ All checks passed.\x1b[0m StripeFlow is ready to run.');
+    line('   Start the server:  StripeFlow');
     line('   Or add to your MCP client config (see --help).');
   } else {
     line('\x1b[33m⚠ Some checks failed. See above for details.\x1b[0m');
@@ -201,7 +201,7 @@ function checkToolCatalogue(): CheckResult {
   return {
     name: 'Tool catalogue',
     ok: false,
-    detail: `expected ≥${expected} tools, found ${TOOL_COUNT}. The build may be corrupted — reinstall stripe-mcp.`,
+    detail: `expected ≥${expected} tools, found ${TOOL_COUNT}. The build may be corrupted — reinstall StripeFlow.`,
   };
 }
 
@@ -218,7 +218,7 @@ function checkNodeVersion(): CheckResult {
   return {
     name: 'Node.js version',
     ok: false,
-    detail: `v${process.versions.node} — stripe-mcp requires Node.js >=20. Upgrade at https://nodejs.org/`,
+    detail: `v${process.versions.node} — StripeFlow requires Node.js >=20. Upgrade at https://nodejs.org/`,
   };
 }
 

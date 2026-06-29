@@ -1,4 +1,4 @@
-# stripe-mcp — CLAUDE.md
+﻿# StripeFlow — CLAUDE.md
 
 ## Project
 The most complete MCP server for Stripe. Open source. Built for GitHub virality and acquisition.

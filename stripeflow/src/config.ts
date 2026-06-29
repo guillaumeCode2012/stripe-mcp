@@ -1,4 +1,4 @@
-import Stripe from 'stripe';
+﻿import Stripe from 'stripe';
 
 let stripeClient: Stripe | null = null;
 
@@ -25,7 +25,7 @@ export function getStripeClient(): Stripe {
     // stable), which is Stripe's recommended default unless you are mid-
     // migration. See DECISIONS.md 008.
     stripeClient = new Stripe(apiKey, {
-      appInfo: { name: 'stripe-mcp', version: '1.0.0' },
+      appInfo: { name: 'StripeFlow', version: '1.0.0' },
       typescript: true,
     });
   }

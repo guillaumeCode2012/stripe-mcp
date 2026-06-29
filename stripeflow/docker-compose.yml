@@ -1,6 +1,6 @@
-# docker-compose snippet — run stripe-mcp as a long-lived container.
+﻿# docker-compose snippet — run StripeFlow as a long-lived container.
 #
-# Most users will spawn stripe-mcp as a child process of their MCP client
+# Most users will spawn StripeFlow as a child process of their MCP client
 # (Claude Desktop / Cursor / Windsurf) via the stdio transport. This compose
 # file is for the rarer case of running it as a standalone container (e.g.
 # behind an HTTP→stdio bridge, or for CI smoke tests).
@@ -8,13 +8,13 @@
 # Usage:
 #   STRIPE_SECRET_KEY=sk_test_... docker compose up --build
 #   # or, to run a one-off command:
-#   docker compose run --rm stripe-mcp --doctor
+#   docker compose run --rm stripeflow --doctor
 
 services:
-  stripe-mcp:
+  stripeflow:
     build: .
-    image: stripe-mcp:1.0.0
-    container_name: stripe-mcp
+    image: stripeflow:1.0.0
+    container_name: stripeflow
     stdin_open: true
     environment:
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:?STRIPE_SECRET_KEY must be set}

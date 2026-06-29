@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -15,11 +15,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "stripe-mcp — The most complete MCP server for Stripe",
+  title: "StripeFlow — The most complete MCP server for Stripe",
   description:
     "Manage your entire Stripe account — customers, subscriptions, invoices, and analytics — with natural language. 79 tools. One command. Works with Claude, Cursor, Windsurf.",
   keywords: [
-    "stripe-mcp",
+    "StripeFlow",
     "MCP",
     "Model Context Protocol",
     "Stripe",
@@ -29,22 +29,22 @@ export const metadata: Metadata = {
     "AI payments",
     "open source",
   ],
-  authors: [{ name: "stripe-mcp contributors" }],
+  authors: [{ name: "StripeFlow contributors" }],
   icons: {
     icon: "/favicon.ico",
     apple: "/icon.png",
   },
   openGraph: {
-    title: "stripe-mcp — The most complete MCP server for Stripe",
+    title: "StripeFlow — The most complete MCP server for Stripe",
     description:
       "79 tools. 19 categories. One command. Manage your entire Stripe account with natural language. Works with Claude, Cursor, Windsurf.",
-    url: "https://stripe-mcp.vercel.app",
-    siteName: "stripe-mcp",
+    url: "https://stripeflow.vercel.app",
+    siteName: "StripeFlow",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "stripe-mcp — The most complete MCP server for Stripe",
+    title: "StripeFlow — The most complete MCP server for Stripe",
     description:
       "79 tools. 19 categories. One command. Manage your entire Stripe account with natural language.",
   },

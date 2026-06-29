@@ -1,6 +1,6 @@
-# Contributing to stripe-mcp
+﻿# Contributing to StripeFlow
 
-Thanks for your interest in making stripe-mcp better. This guide is short and
+Thanks for your interest in making StripeFlow better. This guide is short and
 practical — read it once and you should be able to ship a PR.
 
 ## Dev environment
@@ -13,8 +13,8 @@ Requirements:
 Setup:
 
 ```bash
-git clone https://github.com/guillaumeCode2012/stripe-mcp.git
-cd stripe-mcp
+git clone https://github.com/guillaumeCode2012/stripeflow.git
+cd StripeFlow
 npm install
 ```
 
@@ -50,7 +50,7 @@ npm run typecheck && npm run lint && npm run build && npm test
 ## Project structure
 
 ```
-stripe-mcp/
+stripeflow/
 ├── src/
 │   ├── index.ts              # Entry point — boots StdioServerTransport
 │   ├── server.ts             # createServer(): wires allTools into an MCP Server

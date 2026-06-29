@@ -1,7 +1,7 @@
-import type { Tool } from '@modelcontextprotocol/sdk/types.js';
+﻿import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 
 /**
- * A stripe-mcp tool definition.
+ * A StripeFlow tool definition.
  * - `definition` is the MCP tool manifest (name, description, JSON schema).
  * - `execute` runs the tool against the Stripe API and returns a string result
  *   (JSON.stringify of the Stripe response, or a human-readable error string).

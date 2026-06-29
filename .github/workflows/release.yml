@@ -1,4 +1,4 @@
-name: Release
+﻿name: Release
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
 
 defaults:
   run:
-    working-directory: stripe-mcp
+    working-directory: stripeflow
 
 jobs:
   publish:
@@ -21,7 +21,7 @@ jobs:
           node-version: '20.x'
           registry-url: 'https://registry.npmjs.org'
           cache: 'npm'
-          cache-dependency-path: stripe-mcp/package-lock.json
+          cache-dependency-path: stripeflow/package-lock.json
       - run: npm ci
       - run: npm run build
       - run: npm publish --access public

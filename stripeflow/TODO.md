@@ -1,4 +1,4 @@
-# TODO — stripe-mcp build
+﻿# TODO — StripeFlow build
 
 ## Phase 1 — Scaffolding
 - [x] CLAUDE.md
@@ -59,4 +59,4 @@
 - [ ] server starts
 
 ## Phase 7 — Landing page (Next.js)
-- [ ] Stunning landing page at / showcasing stripe-mcp
+- [ ] Stunning landing page at / showcasing StripeFlow

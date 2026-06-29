@@ -1,7 +1,7 @@
 {
-  "name": "@guillaume_code_2012/stripe-mcp",
+  "name": "@guillaume_code_2012/stripeflow",
   "version": "1.0.0",
-  "description": "The most complete MCP server for Stripe — manage customers, subscriptions, invoices, and analytics with natural language",
+  "description": "StripeFlow — the most complete MCP server for Stripe. Manage customers, subscriptions, invoices, and analytics with natural language",
   "keywords": [
     "stripe",
     "mcp",
@@ -17,7 +17,7 @@
   "type": "module",
   "main": "dist/index.js",
   "bin": {
-    "stripe-mcp": "dist/index.js"
+    "stripeflow": "dist/index.js"
   },
   "scripts": {
     "build": "tsup",

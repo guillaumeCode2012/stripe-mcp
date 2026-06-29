@@ -1,4 +1,4 @@
-# Changelog
+﻿# Changelog
 
 All notable changes to this project will be documented in this file.
 
@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Initial release
 
-stripe-mcp is the most complete open-source MCP server for Stripe. Manage your
+StripeFlow is the most complete open-source MCP server for Stripe. Manage your
 entire Stripe account — customers, subscriptions, invoices, payouts, and
 analytics — with natural language. Works with Claude Desktop, Cursor, Windsurf,
 and any MCP-compatible client.
@@ -119,4 +119,4 @@ implement the canonical Baremetrics/ChartMogul methodology themselves.
   with > 50,000 charges; cap defaults bound the work
 - API version is intentionally not pinned — see `DECISIONS.md` 008
 
-[1.0.0]: https://github.com/guillaumeCode2012/stripe-mcp/releases/tag/v1.0.0
+[1.0.0]: https://github.com/guillaumeCode2012/stripeflow/releases/tag/v1.0.0

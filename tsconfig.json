@@ -1,4 +1,4 @@
-{
+﻿{
   "compilerOptions": {
     "target": "ES2017",
     "lib": [
@@ -39,7 +39,7 @@
   "exclude": [
     "node_modules",
     "examples",
-    "stripe-mcp",
+    "stripeflow",
     ".next",
     "mini-services"
   ]

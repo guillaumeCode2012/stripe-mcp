@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+﻿import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 // We do NOT mock config here (we want the real stripeMode detection), but we
 // must avoid getStripeClient() being called for the non-doctor tests — those
@@ -24,17 +24,17 @@ describe('handleCliArgs (non-doctor flags)', () => {
 
   it('returns false for no args (server should start)', async () => {
     const { handleCliArgs } = await import('../../src/cli.js');
-    expect(await handleCliArgs(['node', 'stripe-mcp'])).toBe(false);
+    expect(await handleCliArgs(['node', 'StripeFlow'])).toBe(false);
     expect(stdoutSpy).not.toHaveBeenCalled();
     expect(stderrSpy).not.toHaveBeenCalled();
   });
 
   it('prints help and returns true for --help', async () => {
     const { handleCliArgs } = await import('../../src/cli.js');
-    expect(await handleCliArgs(['node', 'stripe-mcp', '--help'])).toBe(true);
+    expect(await handleCliArgs(['node', 'StripeFlow', '--help'])).toBe(true);
     expect(stderrSpy).toHaveBeenCalled();
     const text = stderrSpy.mock.calls.map((c) => String(c[0])).join('');
-    expect(text).toContain('stripe-mcp');
+    expect(text).toContain('StripeFlow');
     expect(text).toContain('USAGE');
     expect(text).toContain('--list-tools');
     expect(text).toContain('--doctor');
@@ -42,25 +42,25 @@ describe('handleCliArgs (non-doctor flags)', () => {
 
   it('prints help and returns true for -h alias', async () => {
     const { handleCliArgs } = await import('../../src/cli.js');
-    expect(await handleCliArgs(['node', 'stripe-mcp', '-h'])).toBe(true);
+    expect(await handleCliArgs(['node', 'StripeFlow', '-h'])).toBe(true);
     expect(stderrSpy).toHaveBeenCalled();
   });
 
   it('prints version and returns true for --version', async () => {
     const { handleCliArgs } = await import('../../src/cli.js');
-    expect(await handleCliArgs(['node', 'stripe-mcp', '--version'])).toBe(true);
+    expect(await handleCliArgs(['node', 'StripeFlow', '--version'])).toBe(true);
     const text = stderrSpy.mock.calls.map((c) => String(c[0])).join('');
-    expect(text).toMatch(/stripe-mcp\s+\d+\.\d+\.\d+/);
+    expect(text).toMatch(/StripeFlow\s+\d+\.\d+\.\d+/);
   });
 
   it('prints version for -v alias', async () => {
     const { handleCliArgs } = await import('../../src/cli.js');
-    expect(await handleCliArgs(['node', 'stripe-mcp', '-v'])).toBe(true);
+    expect(await handleCliArgs(['node', 'StripeFlow', '-v'])).toBe(true);
   });
 
   it('emits valid JSON tool list to stdout for --list-tools', async () => {
     const { handleCliArgs } = await import('../../src/cli.js');
-    expect(await handleCliArgs(['node', 'stripe-mcp', '--list-tools'])).toBe(true);
+    expect(await handleCliArgs(['node', 'StripeFlow', '--list-tools'])).toBe(true);
     const text = stdoutSpy.mock.calls.map((c) => String(c[0])).join('');
     const parsed = JSON.parse(text);
     expect(Array.isArray(parsed)).toBe(true);
@@ -76,7 +76,7 @@ describe('handleCliArgs (non-doctor flags)', () => {
 
   it('emits a categories summary for --list-categories', async () => {
     const { handleCliArgs } = await import('../../src/cli.js');
-    expect(await handleCliArgs(['node', 'stripe-mcp', '--list-categories'])).toBe(true);
+    expect(await handleCliArgs(['node', 'StripeFlow', '--list-categories'])).toBe(true);
     const text = stdoutSpy.mock.calls.map((c) => String(c[0])).join('');
     const parsed = JSON.parse(text);
     expect(parsed).toHaveProperty('total');
@@ -92,7 +92,7 @@ describe('handleCliArgs (non-doctor flags)', () => {
 
   it('warns on stderr for unknown flags and returns false (falls through to server)', async () => {
     const { handleCliArgs } = await import('../../src/cli.js');
-    expect(await handleCliArgs(['node', 'stripe-mcp', '--bogus'])).toBe(false);
+    expect(await handleCliArgs(['node', 'StripeFlow', '--bogus'])).toBe(false);
     const text = stderrSpy.mock.calls.map((c) => String(c[0])).join('');
     expect(text).toContain('unknown argument');
     expect(text).toContain('--help');
@@ -154,10 +154,10 @@ describe('handleCliArgs --doctor', () => {
 
   it('runs all checks and reports success when key authenticates', async () => {
     const { handleCliArgs } = await import('../../src/cli.js');
-    const handled = await handleCliArgs(['node', 'stripe-mcp', '--doctor']);
+    const handled = await handleCliArgs(['node', 'StripeFlow', '--doctor']);
     expect(handled).toBe(true);
     const text = stderrSpy.mock.calls.map((c) => String(c[0])).join('');
-    expect(text).toContain('stripe-mcp doctor');
+    expect(text).toContain('StripeFlow doctor');
     expect(text).toContain('STRIPE_SECRET_KEY');
     expect(text).toContain('test mode');
     expect(text).toContain('Stripe API auth');
@@ -171,7 +171,7 @@ describe('handleCliArgs --doctor', () => {
 
   it('formats the available balance in the auth detail line', async () => {
     const { handleCliArgs } = await import('../../src/cli.js');
-    await handleCliArgs(['node', 'stripe-mcp', '--doctor']);
+    await handleCliArgs(['node', 'StripeFlow', '--doctor']);
     const text = stderrSpy.mock.calls.map((c) => String(c[0])).join('');
     expect(text).toContain('available: 125.00 USD');
     expect(text).toContain('business: "Acme Test Inc"');
@@ -183,7 +183,7 @@ describe('handleCliArgs --doctor', () => {
       throw { type: 'StripePermissionError', message: 'Insufficient permissions' };
     };
     const { handleCliArgs } = await import('../../src/cli.js');
-    const handled = await handleCliArgs(['node', 'stripe-mcp', '--doctor']);
+    const handled = await handleCliArgs(['node', 'StripeFlow', '--doctor']);
     expect(handled).toBe(true);
     const text = stderrSpy.mock.calls.map((c) => String(c[0])).join('');
     // Auth check still passes (balance worked), account info just absent.
@@ -197,7 +197,7 @@ describe('handleCliArgs --doctor', () => {
       throw { type: 'StripeAuthenticationError', message: 'Invalid API Key provided' };
     };
     const { handleCliArgs } = await import('../../src/cli.js');
-    const handled = await handleCliArgs(['node', 'stripe-mcp', '--doctor']);
+    const handled = await handleCliArgs(['node', 'StripeFlow', '--doctor']);
     expect(handled).toBe(true);
     const text = stderrSpy.mock.calls.map((c) => String(c[0])).join('');
     expect(text).toContain('✗');
@@ -209,7 +209,7 @@ describe('handleCliArgs --doctor', () => {
   it('fails the env check when STRIPE_SECRET_KEY is unset', async () => {
     delete process.env.STRIPE_SECRET_KEY;
     const { handleCliArgs } = await import('../../src/cli.js');
-    const handled = await handleCliArgs(['node', 'stripe-mcp', '--doctor']);
+    const handled = await handleCliArgs(['node', 'StripeFlow', '--doctor']);
     expect(handled).toBe(true);
     const text = stderrSpy.mock.calls.map((c) => String(c[0])).join('');
     expect(text).toContain('not set');
@@ -221,7 +221,7 @@ describe('handleCliArgs --doctor', () => {
   it('warns about an unrecognised key prefix', async () => {
     process.env.STRIPE_SECRET_KEY = 'bogus_prefix_abc';
     const { handleCliArgs } = await import('../../src/cli.js');
-    await handleCliArgs(['node', 'stripe-mcp', '--doctor']);
+    await handleCliArgs(['node', 'StripeFlow', '--doctor']);
     const text = stderrSpy.mock.calls.map((c) => String(c[0])).join('');
     expect(text).toContain('unrecognised prefix');
     expect(text).toContain('Some checks failed');

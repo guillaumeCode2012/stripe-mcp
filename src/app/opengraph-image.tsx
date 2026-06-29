@@ -1,7 +1,7 @@
-import { ImageResponse } from "next/og";
+﻿import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "stripe-mcp — The most complete MCP server for Stripe";
+export const alt = "StripeFlow — The most complete MCP server for Stripe";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -47,7 +47,7 @@ export default function Image() {
               letterSpacing: "-0.02em",
             }}
           >
-            stripe-mcp
+            StripeFlow
           </span>
         </div>
 

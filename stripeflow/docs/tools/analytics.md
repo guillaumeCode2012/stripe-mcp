@@ -1,10 +1,10 @@
-# Analytics
+﻿# Analytics
 
 Compute MRR, churn, revenue summaries, top customers, and failed-payment
 reports by paginating Stripe resources client-side and aggregating locally.
 Stripe has no native MRR or churn endpoint, so these tools implement the
 canonical Baremetrics/ChartMogul methodology themselves. **No other Stripe
-MCP server ships analytics tools — these are the crown jewel of stripe-mcp.**
+MCP server ships analytics tools — these are the crown jewel of StripeFlow.**
 
 All analytics tools compute client-side (no Stripe-side aggregation
 available) and may be slow on accounts with > 50,000 charges or

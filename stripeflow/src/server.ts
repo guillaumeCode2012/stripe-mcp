@@ -1,4 +1,4 @@
-import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+﻿import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
@@ -6,12 +6,12 @@ import {
 import { allTools } from './tools/index.js';
 
 /**
- * Build and configure the MCP server with all stripe-mcp tools registered.
+ * Build and configure the MCP server with all StripeFlow tools registered.
  * Exposed as a factory so tests can construct isolated instances.
  */
 export function createServer(): Server {
   const server = new Server(
-    { name: 'stripe-mcp', version: '1.0.0' },
+    { name: 'StripeFlow', version: '1.0.0' },
     { capabilities: { tools: {} } },
   );
 

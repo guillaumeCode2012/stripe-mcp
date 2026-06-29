@@ -1,18 +1,18 @@
-name: CI
+﻿name: CI
 
 on:
   push:
     branches: [main]
     paths:
-      - 'stripe-mcp/**'
+      - 'stripeflow/**'
   pull_request:
     branches: [main]
     paths:
-      - 'stripe-mcp/**'
+      - 'stripeflow/**'
 
 defaults:
   run:
-    working-directory: stripe-mcp
+    working-directory: stripeflow
 
 jobs:
   test:
@@ -27,7 +27,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
-          cache-dependency-path: stripe-mcp/package-lock.json
+          cache-dependency-path: stripeflow/package-lock.json
       - run: npm ci
       - run: npm run typecheck
       - run: npm run lint

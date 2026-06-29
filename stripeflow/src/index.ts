@@ -1,4 +1,4 @@
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+﻿import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { createServer } from './server.js';
 import { config } from './config.js';
 import { handleCliArgs } from './cli.js';
@@ -19,10 +19,10 @@ async function main(): Promise<void> {
   const server = createServer();
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error('stripe-mcp running on stdio');
+  console.error('StripeFlow running on stdio');
 }
 
 main().catch((error) => {
-  console.error('Fatal error starting stripe-mcp:', error);
+  console.error('Fatal error starting StripeFlow:', error);
   process.exit(1);
 });

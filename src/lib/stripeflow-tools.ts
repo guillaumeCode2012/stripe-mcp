@@ -1,9 +1,9 @@
-/**
- * stripe-mcp tool catalogue.
+﻿/**
+ * StripeFlow tool catalogue.
  *
  * This file is the single source of truth for the landing page's tools table.
- * It mirrors the tool surface shipped by the `stripe-mcp` package
- * (`/stripe-mcp/src/tools`). Each entry matches the on-wire tool name
+ * It mirrors the tool surface shipped by the `StripeFlow` package
+ * (`/stripeflow/src/tools`). Each entry matches the on-wire tool name
  * (the exact string an MCP client like Claude Desktop sends).
  *
  * Total: 79 tools across 19 categories.

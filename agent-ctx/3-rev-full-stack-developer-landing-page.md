@@ -1,4 +1,4 @@
-# Task 3-rev — Landing page round 2 (Compare + Changelog + polish)
+﻿# Task 3-rev — Landing page round 2 (Compare + Changelog + polish)
 
 **Agent**: full-stack-developer (landing page round 2)
 **Route**: `/` (single landing page at `src/app/page.tsx`)
@@ -7,7 +7,7 @@
 ## Files modified
 - `src/app/page.tsx` — extended from 2527 → 3025 lines (added 2 new sections, 4 premium-polish features).
 
-No other files touched. The `stripe-mcp/` package was left untouched, as required.
+No other files touched. The `stripeflow/` package was left untouched, as required.
 
 ## What changed
 
@@ -17,13 +17,13 @@ No other files touched. The `stripe-mcp/` package was left untouched, as require
 3. **FAQ chevrons brighter** — added `[&>svg]:text-violet-300 [&>svg]:size-5 [&>svg]:shrink-0 hover:[&>svg]:text-violet-200` to the `AccordionTrigger` className. The default `size-4 text-muted-foreground` chevron is now a larger, brighter violet that rotates on open (Radix's existing `[&[data-state=open]>svg]:rotate-180` rule still applies).
 4. **HowItWorks connectors** — replaced the plain arrow circle with a gradient bar (`bg-gradient-to-r from-violet-500/60 via-fuchsia-400/50 to-emerald-500/60`) sitting behind the arrow circle. Desktop shows a horizontal bar; mobile shows a vertical bar. The grid template changed from `1fr_auto_1fr_auto_1fr_auto_1fr` to `1fr_4rem_1fr_4rem_1fr_4rem_1fr` so the bars have visible width.
 5. **Playground polish** — added:
-   - **Copy response** button (top-right of the response card header, with `CheckCheck` success state) that copies a `stripe-mcp · {tool}\nPrompt: "{prompt}"\nLatency: {ms}ms (simulated)` summary.
+   - **Copy response** button (top-right of the response card header, with `CheckCheck` success state) that copies a `StripeFlow · {tool}\nPrompt: "{prompt}"\nLatency: {ms}ms (simulated)` summary.
    - **Prompt history** row above the prompt grid: `← prev / next →` arrow buttons + a row of 6 dots (active = wide gradient pill, viewed = violet dot, unviewed = dim dot) + `1 / 6` counter. Tracked via a `viewedIds: Set<number>` state that grows as the user clicks prompts.
 
 ### B. New sections (mandatory)
-6. **Compare** (`<Section id="compare">`) — "Why stripe-mcp?" with subhead "The only Stripe MCP with real analytics. Built for production."
-   - 3-column table: Feature | stripe-mcp | Other Stripe MCPs.
-   - stripe-mcp column has a violet→emerald gradient header background and per-cell gradient tint to draw the eye.
+6. **Compare** (`<Section id="compare">`) — "Why StripeFlow?" with subhead "The only Stripe MCP with real analytics. Built for production."
+   - 3-column table: Feature | StripeFlow | Other Stripe MCPs.
+   - StripeFlow column has a violet→emerald gradient header background and per-cell gradient tint to draw the eye.
    - 10 rows: Total tools (79 vs 5–15), Analytics (✓ 5 tools vs ✗), Auto-pagination (✓ vs ✗ manual), Zod validation (✓ vs ✗ raw JSON), Typed errors with doc links (✓ vs ✗), Multi-currency (✓ zero + 3-decimal vs ✗ cents only), Dual date formats (✓ vs ✗), CLI flags (✓ vs ✗), Test coverage (44 tests vs 0–5), License (MIT vs MIT).
    - emerald `Check`, rose `X`, amber `Minus` icons via a `CompareCellView` component.
    - Below the table: a callout "Built solo, open source, MIT. Star it if it saves you time. ⭐" with a gradient GitHub button.
@@ -51,7 +51,7 @@ Plus a fixed `ReadingProgressBar` at the very top of the viewport.
 - `bun run lint` → clean (no errors, no warnings).
 - `curl http://localhost:3000/` → HTTP 200.
 - `tail dev.log` → only `✓ Compiled` + `GET / 200` lines; no runtime errors (the only warning is the pre-existing Next.js `allowedDevOrigins` cross-origin note, which is environmental, not from this code).
-- Verified in rendered HTML: `id="compare"`, `id="changelog"`, "Why stripe-mcp?", "Other Stripe MCPs", "Built solo, open source", "What's new", "Initial release", "Added analytics crown jewel", `aria-label="Previous prompt"`, `aria-label="Next prompt"`, `aria-label="Copy response"`, the FAQ trigger's `[&>svg]:text-violet-300 [&>svg]:size-5` classes, the Compare header `from-violet-500/20 to-emerald-500/20`, the `pointer-events-none fixed inset-x-0 top-0 z-[60] h-0.5` ReadingProgressBar, and `tabular-nums` on the count-up tiles.
+- Verified in rendered HTML: `id="compare"`, `id="changelog"`, "Why StripeFlow?", "Other Stripe MCPs", "Built solo, open source", "What's new", "Initial release", "Added analytics crown jewel", `aria-label="Previous prompt"`, `aria-label="Next prompt"`, `aria-label="Copy response"`, the FAQ trigger's `[&>svg]:text-violet-300 [&>svg]:size-5` classes, the Compare header `from-violet-500/20 to-emerald-500/20`, the `pointer-events-none fixed inset-x-0 top-0 z-[60] h-0.5` ReadingProgressBar, and `tabular-nums` on the count-up tiles.
 
 ## Notes for other agents
 - The `useCountUp` + `useInView` pattern (gated by `useReducedMotion`) is the recommended way to add scroll-triggered numeric animations on this page — copy it if you need more.
