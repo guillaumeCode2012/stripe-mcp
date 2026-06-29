@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import * as React from "react";
-import { useReducedMotion } from "framer-motion";
+import { useReducedMotion, useInView } from "framer-motion";
 import {
   Zap,
   Search,
