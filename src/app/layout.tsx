@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     title: "StripeFlow — The most complete MCP server for Stripe",
     description:
       "79 tools. 19 categories. One command. Manage your entire Stripe account with natural language. Works with Claude, Cursor, Windsurf.",
-    url: "https://stripeflow.vercel.app",
+    url: "https://stripeflow-ecru.vercel.app",
     siteName: "StripeFlow",
     type: "website",
   },
