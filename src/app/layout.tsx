@@ -1,5 +1,4 @@
 ﻿import type { Metadata } from "next";
-import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -60,9 +59,6 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
       >
         {children}
-        <Script id="suppress-framer-motion-dom-errors" strategy="beforeInteractive">
-          {`window.addEventListener('error',function(e){if(e.message&&(e.message.includes('insertBefore')||e.message.includes('removeChild'))){e.stopImmediatePropagation();e.preventDefault();return false}},true)`}
-        </Script>
       </body>
     </html>
   );

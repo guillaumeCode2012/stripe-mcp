@@ -1,7 +1,6 @@
 ﻿"use client";
 
 import * as React from "react";
-import { useReducedMotion, useInView } from "framer-motion";
 import {
   Zap,
   Search,
@@ -441,10 +440,13 @@ function HeroTerminal() {
     { typeMs: 32, holdMs: 9000 }
   );
   const [reduce, setReduce] = React.useState(false);
-  const fmReduce = useReducedMotion();
   React.useEffect(() => {
-    setReduce(fmReduce ?? false);
-  }, [fmReduce]);
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setReduce(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setReduce(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
 
   return (
     <div className="smcp-float relative">
@@ -673,7 +675,22 @@ function StatTile({
   delay: number;
 }) {
   const ref = React.useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-60px" });
+  const [inView, setInView] = React.useState(false);
+  React.useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true);
+          obs.disconnect();
+        }
+      },
+      { rootMargin: "-60px" }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
   const target = numeric ? parseInt(value, 10) : 0;
   // Skip the count-up animation for non-numeric values or reduced-motion users
   // — show the final value directly so they never see a stuck "0".
@@ -699,10 +716,13 @@ function StatTile({
 
 function StatsStrip() {
   const [reduce, setReduce] = React.useState(false);
-  const fmReduce = useReducedMotion();
   React.useEffect(() => {
-    setReduce(fmReduce ?? false);
-  }, [fmReduce]);
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setReduce(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setReduce(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
   const stats: Array<{
     icon: React.ComponentType<{ className?: string }>;
     label: string;
@@ -1502,10 +1522,13 @@ function Playground() {
   const [loading, setLoading] = React.useState<boolean>(true);
   const [runToken, setRunToken] = React.useState<number>(0); // bumps to retrigger response fade
   const [reduce, setReduce] = React.useState(false);
-  const fmReduce = useReducedMotion();
   React.useEffect(() => {
-    setReduce(fmReduce ?? false);
-  }, [fmReduce]);
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setReduce(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setReduce(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
   const { copied, copy } = useCopyToClipboard();
 
   const active = PLAYGROUND_PROMPTS.find((p) => p.id === activeId) ?? PLAYGROUND_PROMPTS[0];
